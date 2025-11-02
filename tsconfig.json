@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "jsx": "react-jsx",
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false,
+    // "jsxFactory": "React.createElement",    // because: `"jsx": "react-jsx"`
+    // "jsxFragmentFactory": "React.Fragment", // because: `"jsx": "react-jsx"`
+    "jsxImportSource": "ags/gtk4",
+    // "reactNamespace": "React",              // because: `"jsx": "react-jsx"`
+    "noLib": false,
+    "useDefineForClassFields": false,
+
+    /* Modules */
+    "module": "ES2022",
+    // "rootDir": undefined,
+    "moduleResolution": "Bundler",
+    // "baseUrl": undefined,
+    "paths": {},
+    "rootDirs": [],
+    "typeRoots": ["node_modules/ags","node_modules/gnim", "@girs"],
+    "types": [],
+    "allowUmdGlobalAccess": false,
+    "resolveJsonModule": false,
+    "noResolve": false,
+
+    /* JavaScript Support */
+    "allowJs": false,
+    "checkJs": false,
+    "maxNodeModuleJsDepth": 0,
+
+    /* Emit */
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "sourceMap": false,
+    // "outFile": undefined,
+    // "outDir": undefined,
+    "removeComments": false,
+    "noEmit": false,
+    "importHelpers": false,
+    // "importsNotUsedAsValues": "remove", // Deprecated
+    "verbatimModuleSyntax": false, // replace "`importsNotUsedAsValues" : "remove"`
+    "downlevelIteration": false,
+    // "sourceRoot": undefined,
+    // "mapRoot": undefined,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "emitBOM": false,
+    "newLine": "lf",
+    "stripInternal": false,
+    "noEmitHelpers": false,
+    "noEmitOnError": true, // false
+    "preserveConstEnums": true, // false
+    // "declarationDir": undefined,
+    // "preserveValueImports": false, // Deprecated
+
+    /* Interop Constraints */
+    "isolatedModules": true, // false
+    "allowSyntheticDefaultImports": true, // false
+    "esModuleInterop": true, // false
+    "preserveSymlinks": false,
+    "forceConsistentCasingInFileNames": true, // false
+
+    /* Type Checking */
+    "strict": true,
+    // "noImplicitAny": false,
+    // "strictNullChecks": false,
+    // "strictFunctionTypes": false,
+    // "strictBindCallApply": false,
+    // "strictPropertyInitialization": false,
+    // "noImplicitThis": false,
+    // "useUnknownInCatchVariables": false,
+    // "alwaysStrict": false,
+    "noUnusedLocals": true, // false
+    "noUnusedParameters": true, // false
+    "exactOptionalPropertyTypes": false,
+    "noImplicitReturns": false, // cannot set to true because ags issue
+    "noFallthroughCasesInSwitch": true, // false
+    "noUncheckedIndexedAccess": false, // cannot set to true because ags doesn't use it
+    "noImplicitOverride": false, // cannot set to true because ags doesn't use it
+    "noPropertyAccessFromIndexSignature": false,
+    "allowUnusedLabels": false, // true
+    "allowUnreachableCode": false, // true
+
+    /* Completeness */
+    // "skipDefaultLibCheck": true, // false - Deprecated
+    "skipLibCheck": true, // false - replace : `"skipDefaultLibCheck": true`
+  },
+}
