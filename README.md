@@ -34,7 +34,7 @@ A GTK Shell configuration that combines Adwaita and AGS.
 
 ## Preview
 
-<video src="https://github.com/gouvinb/agwaita/raw/refs/heads/main/assets/demo.mp4" controls></video>
+https://github.com/user-attachments/assets/c62d139e-97db-40b1-9957-5b8bfa0a4d12
 
 ### Notifications system
 
