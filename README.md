@@ -10,7 +10,8 @@ A GTK Shell configuration that combines Adwaita and AGS.
 - pavucontrol (because I haven't yet developed the part for managing sound/microphone devices)
 - [overskride](https://github.com/kaii-lb/overskride) (because I haven't developed the Bluetooth device management part yet)
 - kvantum with kvantum-qt5 and kvantum-theme-libadwaita for using kvantummanager
-- swaylock and a preparation script `$XDG_LIB_HOME/desktop-scripts/prelock` (the latter is not published because it is only used to take a screenshot and pixelate it for swaylock, and can be replaced by anything else)
+- swaylock and a preparation script
+  `$XDG_LIB_HOME/desktop-scripts/prelock` (the latter is not published because it is only used to take a screenshot and pixelate it for swaylock, and can be replaced by anything else)
 - systemd for using:
     - systemctl
     - loginctl
@@ -26,17 +27,21 @@ A GTK Shell configuration that combines Adwaita and AGS.
     - Run the command `./make.nu -h` to see your options
     - Run the command `./make.nu -h` to see your options
     - Run the command `./make.nu hotrun` to test ags-shell without installation
-    -  Run the command `./make.nu install` to install ags-shell in the $XDG_BIN_HOME folder or the `$HOME/.local/bin` folder, which allows you to access the `ags-shell` command in your PATH
+    - Run the command
+      `./make.nu install` to install ags-shell in the $XDG_BIN_HOME folder or the
+      `$HOME/.local/bin` folder, which allows you to access the
+      `ags-shell` command in your PATH
 
 ## Preview
 
-[demo.mp4](assets/demo.mp4)
+<video src="https://github.com/gouvinb/agwaita/raw/refs/heads/main/assets/demo.mp4" controls></video>
 
 ### Notifications system
 
 ![Notifications.png](assets/Notifications.png)
 
 ### Status bar
+
 ![status-bar.png](assets/status-bar.png)
 
 ### Notifications center
