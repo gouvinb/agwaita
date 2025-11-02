@@ -28,6 +28,26 @@ A GTK Shell configuration that combines Adwaita and AGS.
     - Run the command `./make.nu hotrun` to test ags-shell without installation
     -  Run the command `./make.nu install` to install ags-shell in the $XDG_BIN_HOME folder or the `$HOME/.local/bin` folder, which allows you to access the `ags-shell` command in your PATH
 
+## Preview
+
+[demo.mp4](assets/demo.mp4)
+
+### Notifications system
+
+![Notifications.png](assets/Notifications.png)
+
+### Status bar
+![status-bar.png](assets/status-bar.png)
+
+### Notifications center
+
+![status-bar_notifications-center-empty.png](assets/status-bar_notifications-center-empty.png)
+![status-bar_notifications-center-nonempty.png](assets/status-bar_notifications-center-nonempty.png)
+
+### Quick settings
+
+![status-bar_quick-settings.png](assets/status-bar_quick-settings.png)
+
 ## Roadmap
 
 - [-] Status bar
