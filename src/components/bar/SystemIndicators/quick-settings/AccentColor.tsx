@@ -1,5 +1,6 @@
 import {Gtk} from "ags/gtk4"
 import AccentColorIcon from "../icons/AccentColor"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function AccentColorButtonQS(
     {revealer, onReveal, minWidth}: { revealer: () => Gtk.Revealer, onReveal: () => void, minWidth: number },
@@ -20,12 +21,12 @@ export default function AccentColorButtonQS(
                 }
             }}
         >
-            <box spacing={8}>
+            <box spacing={Dimensions.normalSpacing}>
                 <AccentColorIcon/>
                 <label label={"Accent color"}/>
                 <box hexpand/>
                 <image
-                    iconName={"pan-end-symbolic"}
+                    iconName={"pan-down-symbolic"}
                     iconSize={Gtk.IconSize.NORMAL}
                 />
             </box>

@@ -4,8 +4,9 @@ import {createPoll} from "ags/time"
 import GLib from "gi://GLib"
 import Adw from "gi://Adw"
 import {notifications, setNotifications} from "../../../app/Notifications";
-import Notification, {notificationWidth} from "../../notifications/Notification";
+import Notification from "../../notifications/Notification";
 import {Agenda} from "./DataTimePopover/Agenda";
+import {Dimensions} from "../../../lib/ui/Diemensions";
 
 export function Clock(
     {
@@ -32,6 +33,7 @@ export function Clock(
     return (
         <menubutton label={dateTime}>
             <popover
+                css_classes={["shared-popover"]}
                 heightRequest={popoverRequestHeight}
                 onShow={() => {
                     calendar.show()
@@ -47,9 +49,9 @@ export function Clock(
                         propagateNaturalWidth
                         propagateNaturalHeight
                         heightRequest={popoverRequestHeight}
-                        widthRequest={notificationWidth + 40}
+                        widthRequest={Dimensions.notificationWidth + 40}
                         max_content_height={popoverRequestHeight}
-                        max_content_width={notificationWidth}
+                        max_content_width={Dimensions.notificationWidth}
                     >
                         <With value={notifications}>
                             {(notificationList) => notificationList.length > 0 && (
@@ -59,6 +61,7 @@ export function Clock(
                                 >
                                     <For each={notifications}>
                                         {(notification) => <Notification
+                                            isOverlay={false}
                                             init={
                                                 (n) => {
                                                     const timeout_duration = n.expire_timeout
@@ -88,12 +91,6 @@ export function Clock(
                                 <box
                                     css={`
                                         padding: 8px;
-                                        border-spacing: 8px;
-                                        border-radius: 16px;
-                                        border: 2px solid var(--border-color);
-                                        background-color: var(--dialog-bg-color);
-                                        background-clip: padding-box;
-                                        color: var(--dialog-fg-color);
                                     `}
                                     hexpand
                                     heightRequest={popoverRequestHeight}
@@ -125,7 +122,7 @@ export function Clock(
 
                     <box>
                         <Adw.Clamp
-                            maximumSize={notificationWidth + 40}
+                            maximumSize={Dimensions.notificationWidth + 40}
                         >
                             <Gtk.Separator orientation={Gtk.Orientation.VERTICAL}/>
                             <Agenda

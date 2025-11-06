@@ -3,6 +3,7 @@ import app from "ags/gtk4/app"
 import {Accessor, createBinding, createComputed, createState, For, onCleanup} from "ags"
 import Notification from "../components/notifications/Notification"
 import AstalNotifd from "gi://AstalNotifd"
+import {Dimensions} from "../lib/ui/Diemensions";
 
 
 export const [notifications, setNotifications] = createState(
@@ -14,7 +15,6 @@ export const [notificationsOverlay, setNotificationsOverlay] = createState(
 )
 
 export default function Notifications() {
-
     const notifd = AstalNotifd.get_default()
 
     setNotifications(notifd.get_notifications())
@@ -47,16 +47,19 @@ export default function Notifications() {
         setNotificationsOverlay(notificationsResolved)
     })
 
+    const visible = createComputed([notificationsOverlay, doNotDisturb], (ns, dnd) => ns.length > 0 && !dnd)
+
+    let win: Astal.Window
+
     onCleanup(() => {
         notifd.disconnect(notifiedHandler)
         notifd.disconnect(resolvedHandler)
+        win.destroy()
     })
-
-    const visible = createComputed([notificationsOverlay, doNotDisturb], (ns, dnd) => ns.length > 0 && !dnd)
 
     return (
         <window
-            $={(self) => onCleanup(() => self.destroy())}
+            $={(self) => win = self}
             cssClasses={["ags-notifications"]}
             visible={visible}
             name="notifications"
@@ -71,13 +74,14 @@ export default function Notifications() {
             >
                 <box
                     css={`
-                        padding: 8px;
+                        padding: ${Dimensions.normalSpacing}px;
                     `}
                     orientation={Gtk.Orientation.VERTICAL}
-                    spacing={4}
+                    spacing={Dimensions.smallSpacing}
                 >
                     <For each={notificationsOverlay}>
                         {(notification) => <Notification
+                            isOverlay
                             init={
                                 (n) => {
                                     let timeout_duration = n.expire_timeout

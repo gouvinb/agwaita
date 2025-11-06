@@ -6,10 +6,12 @@ import SystemdUnitFailed from "../components/bar/SystemdUnitFailed"
 import SysTray from "../components/bar/SysTray"
 import {SystemIndicators} from "../components/bar/SystemIndicators/SystemIndicators"
 import Workspaces from "../components/bar/Workspaces";
+import {Dimensions} from "../lib/ui/Diemensions";
 
 export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
-    let win: Astal.Window
     const {TOP, LEFT, RIGHT} = Astal.WindowAnchor
+
+    let win: Astal.Window
 
     onCleanup(() => {
         win.destroy()
@@ -22,7 +24,7 @@ export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
             namespace="ags-bar"
             visible
             css={`
-                padding: 4px 8px;
+                padding: ${Dimensions.smallSpacing}px;
             `}
             cssClasses={["ags-bar"]}
             gdkmonitor={gdkmonitor}
@@ -36,23 +38,23 @@ export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
 
                     <box
                         $type="start"
-                        spacing={4}
+                        spacing={Dimensions.smallSpacing}
                     >
                         <Workspaces gdkmonitor={gdkmonitor}/>
                     </box>
 
                     <box
                         $type="center"
-                        spacing={4}
+                        spacing={Dimensions.smallSpacing}
                     >
                         <Clock
-                            popoverRequestHeight={640}
+                            popoverRequestHeight={Dimensions.notificationCenterHeight}
                         />
                     </box>
 
                     <box
                         $type="end"
-                        spacing={4}
+                        spacing={Dimensions.smallSpacing}
                     >
                         <SystemdUnitFailed/>
                         <SysTray/>

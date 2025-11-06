@@ -1,6 +1,8 @@
-import {createBinding, createState} from "ags"
+import {createBinding, createState, With} from "ags"
 import AstalBattery from "gi://AstalBattery"
 import {Accessor} from "gnim"
+import {Gtk} from "ags/gtk4";
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function BatteryIcon() {
     const battery = AstalBattery.get_default()
@@ -59,25 +61,19 @@ export default function BatteryIcon() {
     isCharging.subscribe(() => updateIcon());
     isPresent.subscribe(() => updateIcon());
 
-    if (!isPresent.get()) {
-        return (
-            <box spacing={4}>
-                <image
-                    iconName={icon}
-                    pixelSize={16}
-                />
-                <label label="!"/>
-            </box>
-        );
-    }
-
     return (
-        <box spacing={4}>
+        <box spacing={Dimensions.smallSpacing}>
             <image
                 iconName={icon}
-                pixelSize={16}
+                iconSize={Gtk.IconSize.NORMAL}
             />
-            <label label={`${Math.round(percentage.get() * 100)}%`}/>
+            <With value={isPresent}>
+                {(isPresent) => isPresent && (
+                    <label label={`${Math.round(percentage.get() * 100)}%`}/>
+                ) || (
+                    <label label="!"/>
+                )}
+            </With>
         </box>
     );
 }

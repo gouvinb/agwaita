@@ -1,6 +1,8 @@
 import {createState, With} from "ags"
 import {shAsync} from "../../lib/ExternalCommand"
 import {interval} from "ags/time"
+import {Dimensions} from "../../lib/ui/Diemensions";
+import {Gtk} from "ags/gtk4";
 
 export default function SystemdUnitFailed() {
     const [_, setFailedUnit] = createState<string[]>([]);
@@ -48,10 +50,8 @@ export default function SystemdUnitFailed() {
         return "";
     }
 
-    // Mise à jour initiale
     updateFailedUnit();
 
-    // Mise à jour périodique
     interval(5000, () => {
         updateFailedUnit();
     });
@@ -61,11 +61,11 @@ export default function SystemdUnitFailed() {
             {(failedUnit) => (
                 failedUnit && <box
                     css={`
-                        padding-right: 4px;
+                        padding-right: ${Dimensions.smallSpacing}px;
                     `}>
                     <image
                         iconName={icon}
-                        pixelSize={16}
+                        iconSize={Gtk.IconSize.NORMAL}
                     />
                     <With value={failedUnitSuccess}>
                         {(failedUnitSuccess) => (

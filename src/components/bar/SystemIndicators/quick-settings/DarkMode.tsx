@@ -2,6 +2,7 @@ import {Gtk} from "ags/gtk4"
 import {interval} from "ags/time"
 import {createState} from "ags"
 import {shAsync} from "../../../../lib/ExternalCommand"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function DarkModeButtonQS(
     {minWidth}: { minWidth: number },
@@ -38,7 +39,7 @@ export default function DarkModeButtonQS(
                     .catch((err) => printerr(err));
             }}
         >
-            <box spacing={8}>
+            <box spacing={Dimensions.normalSpacing}>
                 <image
                     iconName={"night-light-symbolic"}
                     iconSize={Gtk.IconSize.NORMAL}

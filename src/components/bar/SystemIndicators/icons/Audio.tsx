@@ -2,6 +2,7 @@ import {createBinding, createState} from "ags"
 import AstalWp from "gi://AstalWp"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function AudioIcon(
     {onClicked}: { onClicked?: () => void }
@@ -48,9 +49,7 @@ export default function AudioIcon(
         ) : (
             <button
                 css={`
-                    padding: 0;
-                    margin: -4px;
-                    background: none;
+                    margin-left: -${Dimensions.normalSpacing}px;
                 `}
                 hexpand={false}
                 onClicked={onClicked}

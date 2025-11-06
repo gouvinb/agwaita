@@ -150,14 +150,16 @@
 //}
 
 .ags-bar {
-  background: var(--window-bg-color);
+  background-color: var(--window-bg-color);
 
+  // fix: dark mode
   menubutton {
     color: var(--window-fg-color);
   }
 
   .workspaces {
     button.workspace {
+      // fix: dark mode
       color: var(--card-fg-color);
 
       &.focused {
@@ -182,13 +184,17 @@
   }
 
   .qs-revealer {
-    background: var(--overview-bg-color);
-    color: var(--overview-fg-color);
+    background: var(--card-bg-color);
+    color: var(--card-fg-color);
 
     > .accent-color-flowbox {
       button {
         &.active {
           background: var(--accent-bg-color);
+        }
+
+        &.inactive {
+          opacity: 0.34;
         }
       }
     }
@@ -196,5 +202,29 @@
 }
 
 .ags-notifications {
-  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--shade-color) 75%, transparent));
+  background: linear-gradient(to right, transparent, var(--shade-color));
+}
+
+.shared-notification {
+  &.overlay {
+    background-color: var(--window-bg-color);
+    color: var(--window-fg-color);
+  }
+
+  &.card {
+    background-color: var(--card-bg-color);
+    color: var(--card-fg-color);
+  }
+
+  &.low-priority {
+    border: 1px solid var(--border-color);
+  }
+
+  &.normal-priority {
+    border: 1px solid var(--accent-color);
+  }
+
+  &.critical-priority {
+    border: 1px solid var(--error-color);
+  }
 }

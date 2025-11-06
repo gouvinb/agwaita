@@ -1,7 +1,11 @@
 import Brightness from "../../../../services/Brightness"
 import {createState} from "ags"
+import {Gtk} from "../../../../../../../../../usr/share/ags/js/lib/gtk4";
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
-export default function BrightnessIcon() {
+export default function BrightnessIcon(
+    {onClicked}: { onClicked?: () => void }
+) {
     const brightnessInstance = Brightness.get_default()
 
     const [icon, setIcon] = createState<string>(resolveIcon(brightnessInstance.screen))
@@ -27,9 +31,20 @@ export default function BrightnessIcon() {
     }
 
     return (
-        <image
-            iconName={icon}
-            pixelSize={16}
-        />
+        onClicked === undefined ? (
+            <image
+                iconName={icon}
+                iconSize={Gtk.IconSize.NORMAL}/>
+        ) : (
+            <button
+                css={`
+                    margin-left: -${Dimensions.normalSpacing}px;
+                `}
+                sensitive={false}
+                hexpand={false}
+                onClicked={onClicked}
+                iconName={icon}
+            />
+        )
     )
 }

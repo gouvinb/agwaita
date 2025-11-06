@@ -1,6 +1,7 @@
 import {createBinding, createState, With} from "ags"
 import AstalBluetooth from "gi://AstalBluetooth"
 import {Accessor} from "gnim"
+import {Gtk} from "ags/gtk4";
 
 export default function BluetoothIcon() {
     const bluetooth = AstalBluetooth.get_default()!
@@ -47,7 +48,7 @@ export default function BluetoothIcon() {
         <box>
             <image
                 iconName={icon}
-                pixelSize={16}
+                iconSize={Gtk.IconSize.NORMAL}
             />
             <With value={connectedDevices}>
                 {(devicesCount) => devicesCount > 0 && <label

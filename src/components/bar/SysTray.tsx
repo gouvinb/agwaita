@@ -1,6 +1,7 @@
 import {createBinding, For, onCleanup} from "ags"
 import {Gtk} from "ags/gtk4"
 import Tray from "gi://AstalTray"
+import {Dimensions} from "../../lib/ui/Diemensions";
 
 export default function SysTray() {
     const tray = Tray.get_default()
@@ -18,10 +19,13 @@ export default function SysTray() {
     })
 
     return (
-        <box spacing={4}>
+        <box spacing={Dimensions.smallSpacing}>
             <For each={items}>
                 {(item) => (
-                    <menubutton $={(self) => init(self, item)}>
+                    <menubutton
+                        $={(self) => init(self, item)}
+                        tooltip_text={item.tooltipText}
+                    >
                         <image gicon={createBinding(item, "gicon")}/>
                     </menubutton>
                 )}

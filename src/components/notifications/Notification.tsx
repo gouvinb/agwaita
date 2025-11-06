@@ -1,80 +1,92 @@
-import Gtk from "gi://Gtk?version=4.0"
-import Gdk from "gi://Gdk?version=4.0"
-import GLib from "gi://GLib?version=2.0"
-import Adw from "gi://Adw?version=1"
-import Pango from "gi://Pango?version=1.0"
-import AstalNotifd from "gi://AstalNotifd?version=0.1"
+import Gtk from "gi://Gtk"
+import Gdk from "gi://Gdk"
+import GLib from "gi://GLib"
+import Adw from "gi://Adw"
+import Pango from "gi://Pango"
+import AstalNotifd from "gi://AstalNotifd"
+import {Dimensions} from "../../lib/ui/Diemensions";
+import {Shapes} from "../../lib/ui/Shapes";
 
-
-export const notificationWidth = 320
-
-function isIcon(icon?: string | null) {
-    const iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default()!)
-    return icon && iconTheme.has_icon(icon)
-}
-
-function fileExists(path: string) {
-    return GLib.file_test(path, GLib.FileTest.EXISTS)
-}
-
-function time(time: number, format = "%H:%M") {
-    return GLib.DateTime.new_from_unix_local(time).format(format)!
-}
-
-function getUrgencyColor(n: AstalNotifd.Notification) {
-    const {LOW, NORMAL, CRITICAL} = AstalNotifd.Urgency
-    switch (n.urgency) {
-        case LOW:
-            return "transparent"
-        case CRITICAL:
-            return "@error_color"
-        case NORMAL:
-        default:
-            return "@accent_color"
-    }
-}
 
 interface NotificationProps {
     notification: AstalNotifd.Notification,
+    isOverlay: boolean,
     init: ((notification: AstalNotifd.Notification) => void),
 }
 
-export default function Notification({notification: n, init}: NotificationProps) {
-    const borderColor = getUrgencyColor(n)
+export default function Notification({notification: n, isOverlay, init}: NotificationProps) {
+    const cssClasses = getCssClasses(n, isOverlay)
+
+
+    function isIcon(icon?: string | null) {
+        const iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default()!)
+        return icon && iconTheme.has_icon(icon)
+    }
+
+    function fileExists(path: string) {
+        return GLib.file_test(path, GLib.FileTest.EXISTS)
+    }
+
+    function time(time: number, format = "%H:%M") {
+        return GLib.DateTime.new_from_unix_local(time).format(format)!
+    }
+
+    function getCssClasses(n: AstalNotifd.Notification, isOverlay: boolean) {
+        const {LOW, NORMAL, CRITICAL} = AstalNotifd.Urgency
+        const result = ["shared-notification"]
+
+        if (isOverlay) {
+            result.push("overlay")
+        } else {
+            result.push("card")
+        }
+
+        switch (n.urgency) {
+            case LOW:
+                result.push("low-priority")
+                break
+            case CRITICAL:
+                result.push("critical-priority")
+                break
+            case NORMAL:
+            default:
+                result.push("normal-priority")
+                break
+        }
+        return result
+    }
 
     return (
         <Adw.Clamp
             css={`
-                padding: 8px;
-                border-spacing: 8px;
-                border-radius: 16px;
-                border: 2px solid ${borderColor};
-                background-color: var(--dialog-bg-color);
+                padding: ${Dimensions.normalSpacing}px;
+                border-spacing: ${Dimensions.noSpacing}px;
+                border-radius: ${Shapes.windowRadius}px;
                 background-clip: padding-box;
-                color: var(--dialog-fg-color);
             `}
-            maximumSize={notificationWidth}
+            cssClasses={cssClasses}
+            maximumSize={Dimensions.notificationWidth}
         >
             <box
                 css={`
-                    padding: 4px;
+                    padding: ${Dimensions.smallSpacing}px;
                 `}
-                spacing={4}
+                spacing={Dimensions.smallestSpacing}
                 $={() => init(n)}
-                widthRequest={notificationWidth}
+                widthRequest={Dimensions.notificationWidth}
                 orientation={Gtk.Orientation.VERTICAL}
             >
                 <box
                     css={`
-                        padding: 4px;
+                        padding: ${Dimensions.smallSpacing}px;
                     `}
-                    spacing={4}
+                    spacing={Dimensions.smallSpacing}
                 >
                     {(n.appIcon || isIcon(n.desktopEntry)) && (
                         <image
-                            marginEnd={12}
+                            marginEnd={Dimensions.semiBigSpacing}
                             iconName={n.appIcon || n.desktopEntry || "application-x-executable"}
-                            iconSize={Gtk.IconSize.LARGE}
+                            iconSize={Gtk.IconSize.NORMAL}
                         />
                     )}
                     <label
@@ -96,7 +108,7 @@ export default function Notification({notification: n, init}: NotificationProps)
                         label={time(n.time)}
                     />
                     <button
-                        marginStart={12}
+                        marginStart={Dimensions.semiBigSpacing}
                         onClicked={() => n.dismiss()}
                         iconName="window-close-symbolic"
                     />
@@ -104,49 +116,50 @@ export default function Notification({notification: n, init}: NotificationProps)
                 <Gtk.Separator/>
                 <box
                     css={`
-                        padding: 4px;
+                        padding: ${Dimensions.smallSpacing}px;
                     `}
-                    spacing={12}
+                    spacing={Dimensions.semiBigSpacing}
                 >
-                    {n.image && fileExists(n.image) && (
-                        <image valign={Gtk.Align.FILL}/>
-                    )}
-                    {n.image && isIcon(n.image) && (
-                        <box valign={Gtk.Align.FILL}>
+                    {
+                        (n.image && isIcon(n.image) && (
                             <image
                                 iconName={n.image}
                                 halign={Gtk.Align.CENTER}
-                                valign={Gtk.Align.CENTER}
+                                valign={Gtk.Align.START}
+                                iconSize={Gtk.IconSize.LARGE}
+                                marginTop={Dimensions.normalSpacing}
+
                             />
-                        </box>
-                    )}
+                        )) || (n.image && fileExists(n.image) && (
+                            <image
+                                file={n.image}
+                                halign={Gtk.Align.CENTER}
+                                valign={Gtk.Align.START}
+                                iconSize={Gtk.IconSize.LARGE}
+                                marginTop={Dimensions.normalSpacing}
+                            />
+                        ))
+                    }
                     <box
-                        css={`
-                            padding: 4px;
-                        `}
-                        spacing={4}
+                        spacing={Dimensions.smallSpacing}
                         orientation={Gtk.Orientation.VERTICAL}
+                        marginTop={Dimensions.smallSpacing}
                     >
                         <label
                             css={`
                                 font-weight: bold;
                             `}
                             halign={Gtk.Align.START}
-                            xalign={0}
                             label={n.summary}
                             ellipsize={Pango.EllipsizeMode.END}
                         />
-                        {n.body && (
-                            <label
+                        {n.body && (<label
                                 css={`
                                     font-size: small;
                                 `}
+                                halign={Gtk.Align.START}
                                 wrap
                                 useMarkup
-                                halign={Gtk.Align.START}
-                                xalign={0}
-                                justify={Gtk.Justification.LEFT}
-                                // label={escapeMarkup(n.body)}
                                 label={n.body}
                             />
                         )}
@@ -155,9 +168,9 @@ export default function Notification({notification: n, init}: NotificationProps)
                 {n.actions.length > 0 && (
                     <box
                         css={`
-                            padding: 4px;
+                            padding: ${Dimensions.smallSpacing}px;
                         `}
-                        spacing={4}
+                        spacing={Dimensions.smallSpacing}
                     >
                         {n.actions.map(({label, id}) => (
                             <button

@@ -8,7 +8,7 @@ import ICalGLib from "gi://ICalGLib"
 import {Calendar} from "./Calendar";
 import {EventList} from "./EventList";
 import {DateTimeExt} from "../../../../lib/extension/GLibDateTime";
-import {notificationWidth} from "../../../notifications/Notification";
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export type CalendarEvent = {
     summary: string
@@ -173,9 +173,9 @@ export function Agenda(
                 propagateNaturalWidth
                 propagateNaturalHeight
                 hexpand
-                widthRequest={notificationWidth + 40}
+                widthRequest={Dimensions.notificationWidth + 40}
                 max_content_height={popoverRequestHeight / 2 + 24}
-                max_content_width={notificationWidth +40}
+                max_content_width={Dimensions.notificationWidth +40}
             >
                 <box orientation={Gtk.Orientation.VERTICAL}>
                     <box>

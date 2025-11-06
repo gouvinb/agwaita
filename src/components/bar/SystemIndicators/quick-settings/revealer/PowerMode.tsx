@@ -1,6 +1,7 @@
 import {Gtk} from "ags/gtk4"
 import PowerProfiles from "gi://AstalPowerProfiles"
 import {createBinding, With} from "ags"
+import {Dimensions} from "../../../../../lib/ui/Diemensions";
 
 export default function PowerModeRevealerQS(
     {ref}: { ref?: (element: Gtk.Revealer) => void }
@@ -32,18 +33,18 @@ export default function PowerModeRevealerQS(
         >
             <box
                 css={`
-                    padding: 16px;
-                    margin: 8px 0;
-                    border-radius: 16px;
+                    padding: ${Dimensions.bigSpacing}px;
+                    margin: ${Dimensions.normalSpacing}px 0;
+                    border-radius: ${Dimensions.bigSpacing}px;
                 `}
                 cssClasses={["qs-revealer"]}
                 orientation={Gtk.Orientation.VERTICAL}
-                spacing={8}
+                spacing={Dimensions.normalSpacing}
             >
                 <box
                     hexpand
-                    spacing={16}
-                    marginBottom={8}
+                    spacing={Dimensions.bigSpacing}
+                    marginBottom={Dimensions.normalSpacing}
                 >
                     <image
                         iconName="resources-symbolic"
@@ -64,7 +65,7 @@ export default function PowerModeRevealerQS(
                         powerprofiles.activeProfile = "power-saver"
                     }}
                 >
-                    <box spacing={8}>
+                    <box spacing={Dimensions.normalSpacing}>
                         <image
                             iconName="power-profile-power-saver-symbolic"
                             iconSize={Gtk.IconSize.NORMAL}
@@ -87,7 +88,7 @@ export default function PowerModeRevealerQS(
                         powerprofiles.activeProfile = "balanced"
                     }}
                 >
-                    <box spacing={8}>
+                    <box spacing={Dimensions.normalSpacing}>
                         <image
                             iconName="power-profile-balanced-symbolic"
                             iconSize={Gtk.IconSize.NORMAL}
@@ -110,7 +111,7 @@ export default function PowerModeRevealerQS(
                         powerprofiles.activeProfile = "performance"
                     }}
                 >
-                    <box spacing={8}>
+                    <box spacing={Dimensions.normalSpacing}>
                         <image
                             iconName="power-profile-performance-symbolic"
                             iconSize={Gtk.IconSize.NORMAL}

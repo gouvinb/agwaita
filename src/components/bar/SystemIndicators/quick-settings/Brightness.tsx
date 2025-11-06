@@ -29,10 +29,10 @@ export default function BrightnessQS() {
 
     return (
         <box spacing={4}>
-            <BrightnessIcon/>
+            <BrightnessIcon onClicked={() => {}}/>
             <slider
                 $={(self) => slider = self}
-                hexpand={true}
+                hexpand
                 value={brightnessInstance.screen}
                 min={0}
                 max={1}

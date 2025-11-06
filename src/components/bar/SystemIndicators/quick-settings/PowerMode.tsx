@@ -1,5 +1,6 @@
 import {Gtk} from "ags/gtk4"
 import PowerModeIcon from "../icons/PowerMode"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function PowerModeButtonQS(
     {revealer, onReveal, minWidth}: { revealer: () => Gtk.Revealer, onReveal: () => void, minWidth: number },
@@ -19,12 +20,12 @@ export default function PowerModeButtonQS(
                 }
             }}
         >
-            <box spacing={8}>
+            <box spacing={Dimensions.normalSpacing}>
                 <PowerModeIcon/>
                 <label label={"Power mode"}/>
                 <box hexpand/>
                 <image
-                    iconName={"pan-end-symbolic"}
+                    iconName={"pan-down-symbolic"}
                     iconSize={Gtk.IconSize.NORMAL}
                 />
             </box>

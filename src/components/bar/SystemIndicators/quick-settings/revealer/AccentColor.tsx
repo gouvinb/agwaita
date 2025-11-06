@@ -2,6 +2,7 @@ import {Gtk} from "ags/gtk4"
 import {createState} from "ags"
 import {interval} from "ags/time"
 import {shAsync} from "../../../../../lib/ExternalCommand";
+import {Dimensions} from "../../../../../lib/ui/Diemensions";
 
 export default function AccentColorRevealerQS(
     {ref}: { ref?: (element: Gtk.Revealer) => void }
@@ -59,7 +60,11 @@ export default function AccentColorRevealerQS(
 
     function resolveButtonClass(btn: Gtk.ToggleButton) {
         const classes = []
-        if (btn.active) classes.push("active")
+        if (btn.active) {
+            classes.push("active")
+        } else {
+            classes.push("inactive")
+        }
         return classes
     }
 
@@ -78,17 +83,17 @@ export default function AccentColorRevealerQS(
         >
             <box
                 css={`
-                    padding: 16px;
-                    margin: 8px 0;
-                    border-radius: 16px;
+                    padding: ${Dimensions.bigSpacing}px;
+                    margin: ${Dimensions.normalSpacing}px 0;
+                    border-radius: ${Dimensions.bigSpacing}px;
                 `}
                 cssClasses={["qs-revealer"]}
                 orientation={Gtk.Orientation.VERTICAL}
             >
                 <box
                     hexpand
-                    spacing={16}
-                    marginBottom={16}
+                    spacing={Dimensions.bigSpacing}
+                    marginBottom={Dimensions.bigSpacing}
                 >
                     <image
                         iconName="preferences-color-symbolic"
@@ -105,15 +110,15 @@ export default function AccentColorRevealerQS(
 
                 <Gtk.FlowBox
                     cssClasses={["accent-color-flowbox"]}
-                    columnSpacing={4}
-                    rowSpacing={8}
+                    columnSpacing={Dimensions.smallSpacing}
+                    rowSpacing={Dimensions.normalSpacing}
                     homogeneous
                     selectionMode={Gtk.SelectionMode.NONE}
                 >
                     <togglebutton
                         $={(self) => (blueTB = self)}
                         css={`
-                            color: var(--accent-blue);
+                            background-color: var(--accent-blue);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -123,7 +128,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (tealTB = self)}
                         css={`
-                            color: var(--accent-teal);
+                            background-color: var(--accent-teal);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -133,7 +138,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (greenTB = self)}
                         css={`
-                            color: var(--accent-green);
+                            background-color: var(--accent-green);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -143,7 +148,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (yellowTB = self)}
                         css={`
-                            color: var(--accent-yellow);
+                            background-color: var(--accent-yellow);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -153,7 +158,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (orangeTB = self)}
                         css={`
-                            color: var(--accent-orange);
+                            background-color: var(--accent-orange);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -163,7 +168,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (redTB = self)}
                         css={`
-                            color: var(--accent-red);
+                            background-color: var(--accent-red);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -173,7 +178,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (pinkTB = self)}
                         css={`
-                            color: var(--accent-pink);
+                            background-color: var(--accent-pink);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -183,7 +188,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (purpleTB = self)}
                         css={`
-                            color: var(--accent-purple);
+                            background-color: var(--accent-purple);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {
@@ -193,7 +198,7 @@ export default function AccentColorRevealerQS(
                     <togglebutton
                         $={(self) => (slateTB = self)}
                         css={`
-                            color: var(--accent-slate);
+                            background-color: var(--accent-slate);
                         `}
                         halign={Gtk.Align.CENTER}
                         onToggled={(btn) => {

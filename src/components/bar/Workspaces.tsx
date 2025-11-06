@@ -57,7 +57,11 @@ export default function Workspaces({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
 
 
     return (
-        <box cssClasses={["workspaces"]} spacing={4} halign={Gtk.Align.START}>
+        <box
+            cssClasses={["workspaces"]}
+            spacing={4}
+            halign={Gtk.Align.START}
+        >
             <For each={workspaces}>
                 {(workspaceUi) => <button
                     css={`

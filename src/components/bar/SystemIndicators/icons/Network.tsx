@@ -1,6 +1,7 @@
 import {createState} from "ags"
 import {interval} from "ags/time"
 import GLib from "gi://GLib"
+import {Gtk} from "ags/gtk4";
 
 type NetworkState = {
     type: "wired" | "wifi" | "none"
@@ -124,7 +125,7 @@ export default function NetworkIcon() {
     return (
         <image
             iconName={icon}
-            pixelSize={16}
+            iconSize={Gtk.IconSize.NORMAL}
         />
     );
 }

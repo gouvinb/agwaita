@@ -1,5 +1,6 @@
 import AstalNotifd from "gi://AstalNotifd"
 import DoNotDisturbIcon from "../icons/DoNotDisturb"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function DoNotDisturbButtonQS(
     {minWidth}: { minWidth: number },
@@ -18,7 +19,7 @@ export default function DoNotDisturbButtonQS(
             active={notifd.dontDisturb}
             onClicked={() => toggleDnd()}
         >
-            <box spacing={8}>
+            <box spacing={Dimensions.normalSpacing}>
                 <DoNotDisturbIcon/>
                 <label label={"Do not disturb"}/>
             </box>

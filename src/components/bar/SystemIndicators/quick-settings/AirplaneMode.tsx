@@ -2,6 +2,7 @@ import {Gtk} from "ags/gtk4"
 import {interval} from "ags/time"
 import {createState} from "ags"
 import DesktopScriptLib from "../../../../lib/ExternalCommand"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function AirplaneModeButtonQS(
     {minWidth}: { minWidth: number },
@@ -42,8 +43,7 @@ export default function AirplaneModeButtonQS(
                     .catch((err) => printerr(err));
             }}
         >
-
-            <box spacing={8}>
+            <box spacing={Dimensions.normalSpacing}>
                 <image
                     iconName={icon}
                     iconSize={Gtk.IconSize.NORMAL}
