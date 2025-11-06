@@ -28,35 +28,37 @@ export class GlobalRequestHandler implements RequestHandler {
         if (cmd == "-h" || cmd == "--help" || cmd == "help" || cmd == "") {
             this.help()
         } else {
-            const handler = this.cmds.find((command) => command.name == cmd)!.handler
-            if (handler != null) {
+            const handler = this.cmds.find((command) => command.name == cmd)?.handler
+            if (handler != undefined) {
                 handler.parse(arg!, rest[0], ...rest.slice(1))
             } else {
-                throw `Unknown command: ${cmd} ${arg} ${rest}`
+                throw `Unknown command: ${cmd}${arg ? ` ${arg}` : ``}${rest ? ` ${rest}` : ``}`
             }
         }
     }
 
-    help(): void {
-        this.response(`
-            |Usage:
-            |  > ags request <action>
-            |
-            |Subcommands:
-            |${this.cmds.map((cmd) => `  ags request ${cmd.name}`).join("\n|")}
-            |
-            |Flags:
-            |  -h, --help: Display the help message for this command
-            |
-            |Parameters:
-            |  action <string>: ${this.cmds.map((cmd) => cmd.name).join(", ")}
-            |
-            |Input/output types:
-            |string | nothing
-        `
-            .split("\n")
-            .map(line => line.trimStart().replace("|", ""))
-            .join("\n")
+    help(msg?: string): void {
+        this.response(
+            (msg ? `${msg}\n` : ``) +
+            `
+                |Usage:
+                |  > ags request <action>
+                |
+                |Subcommands:
+                |${this.cmds.map((cmd) => `  ags request ${cmd.name}`).join("\n|")}
+                |
+                |Flags:
+                |  -h, --help: Display the help message for this command
+                |
+                |Parameters:
+                |  action <string>: ${this.cmds.map((cmd) => cmd.name).join(", ")}
+                |
+                |Input/output types:
+                |string | nothing
+            `
+                .split("\n")
+                .map(line => line.trimStart().replace("|", ""))
+                .join("\n")
         )
     }
 }

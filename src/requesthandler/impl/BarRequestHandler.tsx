@@ -59,31 +59,35 @@ export class BarRequestHandler implements RequestHandler {
             }
 
             return this.response(this.bar.visible.toString())
+        } else if (cmd != undefined) {
+            throw `Unknown command: ${this.parentCommand} ${cmd}${arg ? ` ${arg}` : ``}${rest ? ` ${rest}` : ``}`
         } else {
-            throw `Unknown command: ${cmd} ${arg} ${rest}`
+            throw `Argument is missing for ${this.parentCommand}`
         }
     }
 
-    help(): void {
-        this.response(`
-            |Usage:
-            |  > ags request ${this.parentCommand} <action>
-            |
-            |Subcommands:
-            |${this.cmds.map((cmd) => `  ags request ${this.parentCommand} ${cmd.name}`).join("\n|")}
-            |
-            |Flags:
-            |  -h, --help: Display the help message for this command
-            |
-            |Parameters:
-            |  action <string>: ${this.cmds.map((cmd) => cmd.name).join(", ")}
-            |
-            |Input/output types:
-            |string | nothing
-        `
-            .split("\n")
-            .map(line => line.trimStart().replace("|", ""))
-            .join("\n")
+    help(msg?: string): void {
+        this.response(
+            (msg ? `${msg}\n` : ``) +
+            `
+                |Usage:
+                |  > ags request ${this.parentCommand} <action>
+                |
+                |Subcommands:
+                |${this.cmds.map((cmd) => `  ags request ${this.parentCommand} ${cmd.name}`).join("\n|")}
+                |
+                |Flags:
+                |  -h, --help: Display the help message for this command
+                |
+                |Parameters:
+                |  action <string>: ${this.cmds.map((cmd) => cmd.name).join(", ")}
+                |
+                |Input/output types:
+                |string | nothing
+            `
+                .split("\n")
+                .map(line => line.trimStart().replace("|", ""))
+                .join("\n")
         )
     }
 }

@@ -3,7 +3,7 @@ export interface RequestHandler {
 
     parse(cmd: string, arg: string | null | undefined, ...rest: string[]): void
 
-    help(): void
+    help(msg?: string): void
 }
 
 

@@ -11,11 +11,12 @@ app.start({
     css: style,
     requestHandler(argv: string[], response: (response: string) => void) {
         const [cmd, arg, ...rest] = argv
+        const globalRequestHandler = new GlobalRequestHandler(response);
         try {
             if (cmd == null) throw new Error("No command provided")
-            new GlobalRequestHandler(response).parse(cmd, arg, ...rest)
+            globalRequestHandler.parse(cmd, arg, ...rest)
         } catch (error) {
-            response(`${error}`)
+            globalRequestHandler.help(`${error}`)
         }
     },
     main() {
