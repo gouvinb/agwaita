@@ -55,11 +55,16 @@ https://github.com/user-attachments/assets/c62d139e-97db-40b1-9957-5b8bfa0a4d12
 
 ## Roadmap
 
-- [-] Status bar
-- [ ] Application launcher
-- [x] Notification system
+### Source
 
-### Status Bar
+- [x] Lifecyle system
+- [-] Logger system
+  - [x] API
+  - [ ] Environment variable
+- [ ] Use official Niri Astal API (not release yet)
+
+
+### - [-] Status bar
 
 #### Left side
 
@@ -109,12 +114,12 @@ https://github.com/user-attachments/assets/c62d139e-97db-40b1-9957-5b8bfa0a4d12
             - [x] Button
             - [-] Dropdown (for now, ags-shell redirects to overskride)
 
-### Application launcher
+### - [ ] Application launcher
 
 - [ ] Application grid sorted alphabetically (locale considered)
 - [ ] Search bar
 
-### Notification system
+### - [x] Notification system
 
 - [x] Takes into account the DontDisturb function
 - [x] Scrollable
