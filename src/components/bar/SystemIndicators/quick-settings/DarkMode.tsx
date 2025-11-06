@@ -1,14 +1,20 @@
 import {Gtk} from "ags/gtk4"
-import {interval} from "ags/time"
+import {interval, Timer} from "ags/time"
 import {createState} from "ags"
 import {shAsync} from "../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../lib/ui/Diemensions";
 import {Log} from "../../../../lib/Logger";
+import {Lifecycle} from "../../../../lib/Lifecyle";
 
 export default function DarkModeButtonQS(
-    {minWidth}: { minWidth: number },
+    {parentLifecycle = null, minWidth}: {
+        parentLifecycle?: Lifecycle | null,
+        minWidth: number,
+    },
 ) {
     const [mode, setMode] = createState<string>("prefer-dark")
+
+    let darkModeStateTimer: Timer | null = null
 
     function updateDarkModeState() {
         shAsync("gsettings get org.gnome.desktop.interface color-scheme")
@@ -18,9 +24,17 @@ export default function DarkModeButtonQS(
             .catch((err) => Log.e("DarkModeButtonQS", `Cannot get color scheme`, err))
     }
 
-    interval(1000, () => {
-        updateDarkModeState()
-    })
+    if (parentLifecycle !== null) {
+        parentLifecycle.onStart(() => {
+            if (darkModeStateTimer == null) {
+                darkModeStateTimer = interval(1000, () => updateDarkModeState())
+            }
+        })
+        parentLifecycle.onStop(() => {
+            darkModeStateTimer?.cancel()
+            darkModeStateTimer = null
+        })
+    }
 
     updateDarkModeState()
 

@@ -1,15 +1,21 @@
 import {Gtk} from "ags/gtk4"
 import {createState} from "ags"
-import {interval} from "ags/time"
+import {interval, Timer} from "ags/time"
 import {shAsync} from "../../../../../lib/ExternalCommand";
 import {Dimensions} from "../../../../../lib/ui/Diemensions";
 import {Log} from "../../../../../lib/Logger";
+import {Lifecycle} from "../../../../../lib/Lifecyle";
 
 export default function AccentColorRevealerQS(
-    {ref}: { ref?: (element: Gtk.Revealer) => void }
+    {ref, parentLifecycle = null}: {
+        ref?: (element: Gtk.Revealer) => void,
+    parentLifecycle?: Lifecycle | null,
+    }
 ) {
 
     const [accentColor, setAccentColor] = createState<string>("blue");
+
+    let accentColorStateTimer: Timer | null = null
 
     let blueTB: Gtk.ToggleButton
     let tealTB: Gtk.ToggleButton
@@ -69,9 +75,17 @@ export default function AccentColorRevealerQS(
         return classes
     }
 
-    interval(1000, () => {
-        updateAccentColorState();
-    });
+    if (parentLifecycle !== null) {
+        parentLifecycle.onStart(() => {
+            if (accentColorStateTimer == null) {
+                accentColorStateTimer = interval(1000, () => updateAccentColorState());
+            }
+        })
+        parentLifecycle.onStop(() => {
+            accentColorStateTimer?.cancel()
+            accentColorStateTimer = null
+        })
+    }
 
     updateAccentColorState();
 

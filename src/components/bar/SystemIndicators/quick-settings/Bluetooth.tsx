@@ -1,5 +1,6 @@
 import {Gtk} from "ags/gtk4"
 import {shAsync} from "../../../../lib/ExternalCommand"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function BluetoothButtonQS(
     {minWidth}: { minWidth: number },
@@ -19,7 +20,7 @@ export default function BluetoothButtonQS(
                     .catch((_) => notifyError())
             }}
         >
-            <box spacing={8}>
+            <box spacing={Dimensions.normalSpacing}>
                 <image
                     iconName={"bluetooth-symbolic"}
                     iconSize={Gtk.IconSize.NORMAL}

@@ -3,6 +3,7 @@ import {Accessor, For, With} from "ags";
 import "../../../../lib/extension/GLibDateTime"
 import "../../../../lib/extension/String"
 import {CalendarEvent} from "../../../../services/Agenda";
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export function EventList(
     {
@@ -21,10 +22,10 @@ export function EventList(
             {(eventList) => predicate(eventList) && (
                 <box
                     css={`
-                        padding-left: 8px;
+                        padding-left: ${Dimensions.normalSpacing}px;
                     `}
                     orientation={Gtk.Orientation.VERTICAL}
-                    spacing={4}
+                    spacing={Dimensions.smallSpacing}
                 >
                     <label
                         css={`
@@ -39,16 +40,16 @@ export function EventList(
                                 <box
                                     css={`
                                         background: ${entry.color ?? "--accent-color"};
-                                        border-top-left-radius: 4px;
-                                        border-bottom-left-radius: 4px;
-                                        padding: 2px;
+                                        border-top-left-radius: ${Dimensions.smallSpacing}px;
+                                        border-bottom-left-radius: ${Dimensions.smallSpacing}px;
+                                        padding: ${Dimensions.smallestSpacing}px;
                                     `}/>
                                 <box
                                     css={`
                                         background: alpha(${entry.color ?? "--accent-color"}, 0.25);
-                                        border-top-right-radius: 4px;
-                                        border-bottom-right-radius: 4px;
-                                        padding: 4px;
+                                        border-top-right-radius: ${Dimensions.smallSpacing}px;
+                                        border-bottom-right-radius: ${Dimensions.smallSpacing}px;
+                                        padding: ${Dimensions.smallSpacing}px;
                                     `}
                                     orientation={Gtk.Orientation.VERTICAL}
                                 >

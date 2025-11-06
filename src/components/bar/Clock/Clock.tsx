@@ -7,6 +7,7 @@ import {notifications, setNotifications} from "../../../app/Notifications";
 import Notification from "../../notifications/Notification";
 import {DataTimePopover} from "./DataTimePopover/DateTimePopover";
 import {Dimensions} from "../../../lib/ui/Diemensions";
+import {createLifecycle} from "../../../lib/Lifecyle";
 
 export function Clock(
     {
@@ -22,29 +23,29 @@ export function Clock(
         1000,
         () => GLib.DateTime.new_now_local(),
     )
+    const popoverLifecycle = createLifecycle()
 
     const dateTime = rawDateTime.as((data) => data.format(format)!.capitalize())
 
-    let calendar: Gtk.Calendar
-
     onCleanup(() => {
+        popoverLifecycle.dispose()
     })
 
     return (
-        <menubutton label={dateTime}>
+        <menubutton
+            label={dateTime}
+        >
             <popover
                 css_classes={["shared-popover"]}
                 heightRequest={popoverRequestHeight}
                 onShow={() => {
-                    calendar.show()
+                    popoverLifecycle.start()
                 }}
-                onHide={() => {
-                    calendar.hide()
-                    calendar.set_date(rawDateTime.get())
-                    calendar.select_day(rawDateTime.get())
+                onClosed={() => {
+                    popoverLifecycle.stop()
                 }}
             >
-                <box orientation={Gtk.Orientation.HORIZONTAL} spacing={4}>
+                <box orientation={Gtk.Orientation.HORIZONTAL} spacing={Dimensions.smallSpacing}>
                     <scrolledwindow
                         propagateNaturalWidth
                         propagateNaturalHeight
@@ -57,7 +58,7 @@ export function Clock(
                             {(notificationList) => notificationList.length > 0 && (
                                 <box
                                     orientation={Gtk.Orientation.VERTICAL}
-                                    spacing={4}
+                                    spacing={Dimensions.smallSpacing}
                                 >
                                     <For each={notifications}>
                                         {(notification) => <Notification
@@ -90,14 +91,14 @@ export function Clock(
                             ) || (
                                 <box
                                     css={`
-                                        padding: 8px;
+                                        padding: ${Dimensions.normalSpacing}px;
                                     `}
                                     hexpand
                                     heightRequest={popoverRequestHeight}
                                 >
                                     <box
                                         orientation={Gtk.Orientation.VERTICAL}
-                                        spacing={4}
+                                        spacing={Dimensions.smallSpacing}
                                         halign={Gtk.Align.CENTER}
                                         valign={Gtk.Align.CENTER}
                                     >
@@ -120,13 +121,14 @@ export function Clock(
                         </With>
                     </scrolledwindow>
 
+                    <Gtk.Separator orientation={Gtk.Orientation.VERTICAL}/>
+
                     <box>
                         <Adw.Clamp
                             maximumSize={Dimensions.notificationWidth + 40}
                         >
-                            <Gtk.Separator orientation={Gtk.Orientation.VERTICAL}/>
                             <DataTimePopover
-                                refCalendar={(instance) => calendar = instance}
+                                parentLifecycle={popoverLifecycle}
                                 popoverRequestHeight={popoverRequestHeight}
                             />
                         </Adw.Clamp>

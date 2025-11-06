@@ -2,6 +2,7 @@ import {Gdk, Gtk} from "ags/gtk4"
 import {createState, For} from "ags"
 import currentWM, {WM, Workspace} from "../../services/wm/WM"
 import {Log} from "../../lib/Logger";
+import {Dimensions} from "../../lib/ui/Diemensions";
 
 type WorkspaceUi = {
     index: number,
@@ -60,7 +61,7 @@ export default function Workspaces({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
     return (
         <box
             cssClasses={["workspaces"]}
-            spacing={4}
+            spacing={Dimensions.smallSpacing}
             halign={Gtk.Align.START}
         >
             <For each={workspaces}>

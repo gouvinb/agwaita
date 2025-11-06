@@ -1,15 +1,21 @@
 import {Gtk} from "ags/gtk4"
-import {interval} from "ags/time"
+import {interval, Timer} from "ags/time"
 import {createState} from "ags"
 import DesktopScriptLib from "../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../lib/ui/Diemensions";
 import {Log} from "../../../../lib/Logger";
+import {Lifecycle} from "../../../../lib/Lifecyle";
 
-export default function AirplaneModeButtonQS(
-    {minWidth}: { minWidth: number },
+export function AirplaneModeButtonQS(
+    {parentLifeCycle = null, minWidth}: {
+        parentLifeCycle?: Lifecycle | null,
+        minWidth: number,
+    },
 ) {
     const [mode, setMode] = createState<string>("up")
     const [icon, setIcon] = createState<string>("airplane-mode-disabled-symbolic");
+
+    let airplaneModeStateTimer: Timer | null = null
 
     function updateAirplaneModeState() {
         DesktopScriptLib.execAsync("airplane_mode status")
@@ -24,9 +30,17 @@ export default function AirplaneModeButtonQS(
             .catch((err) => Log.e("AirplaneModeButtonQS", `Cannot get airplane mode status`, err))
     }
 
-    interval(1000, () => {
-        updateAirplaneModeState();
-    });
+    if (parentLifeCycle != null) {
+        parentLifeCycle.onStart(() => {
+            if (airplaneModeStateTimer == null) {
+                airplaneModeStateTimer = interval(1000, () => updateAirplaneModeState())
+            }
+        })
+        parentLifeCycle.onStop(() => {
+            airplaneModeStateTimer?.cancel()
+            airplaneModeStateTimer = null
+        })
+    }
 
     updateAirplaneModeState();
 

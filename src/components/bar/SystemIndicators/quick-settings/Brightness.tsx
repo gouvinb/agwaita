@@ -2,6 +2,7 @@ import BrightnessIcon from "../icons/Brightness"
 import Brightness from "../../../../services/Brightness"
 import GLib from "gi://GLib?version=2.0"
 import {Astal} from "ags/gtk4"
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function BrightnessQS() {
     const brightnessInstance = Brightness.get_default()
@@ -28,7 +29,7 @@ export default function BrightnessQS() {
     });
 
     return (
-        <box spacing={4}>
+        <box spacing={Dimensions.smallSpacing}>
             <BrightnessIcon onClicked={() => {}}/>
             <slider
                 $={(self) => slider = self}

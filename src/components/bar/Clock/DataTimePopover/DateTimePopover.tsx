@@ -1,49 +1,49 @@
 import {Accessor, createState, onCleanup} from "ags"
 import {Gtk} from "ags/gtk4"
-import {createPoll} from "ags/time"
+import {interval, Timer} from "ags/time"
 import GLib from "gi://GLib"
 import Agenda, {CalendarEvent} from "../../../../services/Agenda"
 import {Calendar} from "./Calendar";
 import {EventList} from "./EventList";
 import {DateTimeExt} from "../../../../lib/extension/GLibDateTime";
 import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Lifecycle} from "../../../../lib/Lifecyle";
 
 export function DataTimePopover(
-    {refCalendar, popoverRequestHeight}: {
-        refCalendar: (instance: Gtk.Calendar) => void,
+    {parentLifecycle, popoverRequestHeight}: {
+        parentLifecycle: Lifecycle,
         popoverRequestHeight: number,
     },
 ) {
-    const svc = Agenda.get_default()
+    const agenda = Agenda.get_default()
 
-    const rawDateTime: Accessor<GLib.DateTime> = createPoll(
-        GLib.DateTime.new_now_local(),
-        1000,
-        () => GLib.DateTime.new_now_local(),
-    )
+    const [rawDateTime, setRawDateTime] = createState(GLib.DateTime.new_now_local())
+
+    let rawDateTimeTimer : Timer | null = null
+
     const [calendarSelectedDate, setCalendarSelectedDate] = createState<GLib.DateTime>(rawDateTime.get())
     const calendarSelectedDateFormatted = calendarSelectedDate.as((date) => date.format("%A %d %b %Y")!.capitalize())
 
     const eventsAccessor = {
-        get: () => svc.events,
+        get: () => agenda.events,
         subscribe: (cb: (e: CalendarEvent[]) => void) => {
-            const id = svc.connect("notify::events", () => cb(svc.events))
-            return () => svc.disconnect(id)
+            const id = agenda.connect("notify::events", () => cb(agenda.events))
+            return () => agenda.disconnect(id)
         }
     }
 
     const todayEventsAccessor: Accessor<CalendarEvent[]> = new Accessor<CalendarEvent[]>(
-        () => svc.events.filter(
-            (event) => event.start.format("%Y%m%d")! === rawDateTime.get().format("%Y%m%d")!
+        () => agenda.events.filter(
+            (event) => event.start.format("%Y%m%d")! === (rawDateTime?.get().format("%Y%m%d") ?? "")
         ),
         (cb: (e: CalendarEvent[]) => void) => {
-            const id = svc.connect("notify::events", () => cb(todayEventsAccessor.get()))
-            return () => svc.disconnect(id)
+            const id = agenda.connect("notify::events", () => cb(todayEventsAccessor.get()))
+            return () => agenda.disconnect(id)
         }
     )
 
     const selectedDayEventsAccessor: Accessor<CalendarEvent[]> = calendarSelectedDate.as((date: GLib.DateTime) =>
-        svc.events.filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
+        agenda.events.filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
     )
 
     let calendar: Gtk.Calendar
@@ -66,7 +66,19 @@ export function DataTimePopover(
         });
     }
 
-    const updateDaySelected = () => setCalendarSelectedDate(calendar.get_date())
+    const updateDaySelected = (calendar : Gtk.Calendar) => setCalendarSelectedDate(calendar.get_date())
+        parentLifecycle.onStart(() => {
+            rawDateTimeTimer = interval(
+                1000,
+                () => setRawDateTime(GLib.DateTime.new_now_local()),
+            )
+            agenda.initAllTimer()
+        })
+        parentLifecycle.onStop(() => {
+            rawDateTimeTimer?.cancel()
+            rawDateTimeTimer = null
+            agenda.stopAllTimer()
+        })
 
     onCleanup(() => {
     })
@@ -76,12 +88,12 @@ export function DataTimePopover(
     return (
         <box
             orientation={Gtk.Orientation.VERTICAL}
-            spacing={4}
+            spacing={Dimensions.smallSpacing}
         >
             <Calendar
+                parentLifecycle={parentLifecycle}
                 ref={(instance) => {
                     calendar = instance
-                    refCalendar(instance)
                 }}
                 markCalendar={markCalendar}
                 updateDaySelected={updateDaySelected}

@@ -3,7 +3,11 @@ import PowerModeIcon from "../icons/PowerMode"
 import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function PowerModeButtonQS(
-    {revealer, onReveal, minWidth}: { revealer: () => Gtk.Revealer, onReveal: () => void, minWidth: number },
+    {revealer, onReveal, minWidth}: {
+        revealer: () => Gtk.Revealer,
+        onReveal: () => void,
+        minWidth: number,
+    },
 ) {
     return (
         <button

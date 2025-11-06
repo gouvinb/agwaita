@@ -2,6 +2,7 @@ import GLib from "gi://GLib"
 import {Gtk} from "ags/gtk4"
 import {createState, With} from "ags"
 import {interval} from "ags/time";
+import {Dimensions} from "../../../../lib/ui/Diemensions";
 
 export default function AvatarIcon() {
     const userName = GLib.get_user_name()
@@ -47,7 +48,7 @@ export default function AvatarIcon() {
                         min-height: 16px;
                         border-radius: 50%;
                         background: var(--accent-bg-color);
-                        padding: 2px;
+                        padding: ${Dimensions.smallestSpacing}px;
                     `}
                     halign={Gtk.Align.CENTER}
                     valign={Gtk.Align.CENTER}

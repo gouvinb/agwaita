@@ -15,11 +15,13 @@ import PowerModeButtonQS from "./quick-settings/PowerMode";
 import PowerModeRevealerQS from "./quick-settings/revealer/PowerMode";
 import DarkModeButtonQS from "./quick-settings/DarkMode";
 import BluetoothButtonQS from "./quick-settings/Bluetooth";
-import AirplaneModeButtonQS from "./quick-settings/AirplaneMode";
+import {AirplaneModeButtonQS} from "./quick-settings/AirplaneMode";
 import DoNotDisturbButtonQS from "./quick-settings/DoNotDisturb";
 import AccentColorButtonQS from "./quick-settings/AccentColor";
 import AccentColorRevealerQS from "./quick-settings/revealer/AccentColor";
 import {Dimensions} from "../../../lib/ui/Diemensions";
+import {createLifecycle} from "../../../lib/Lifecyle";
+import {onCleanup} from "ags";
 
 export function SystemIndicators() {
     let menuButton: Gtk.MenuButton
@@ -29,13 +31,23 @@ export function SystemIndicators() {
 
     const halfQuickSettingsWidth = Dimensions.quickSettingsWidth / 2 - Dimensions.normalSpacing;
 
+    const lifecycle = createLifecycle()
+
+    lifecycle.onStop(() => {
+        powerModeRevealer.revealChild = false;
+    })
+
+    onCleanup(() => {
+        lifecycle.dispose()
+    })
+
     return (
         <box
             spacing={Dimensions.smallSpacing}
             halign={Gtk.Align.END}
         >
             <menubutton $={(self: Gtk.MenuButton) => (menuButton = self)}>
-                <box spacing={8}>
+                <box spacing={Dimensions.normalSpacing}>
                     <BrightnessIcon/>
 
                     <AudioIcon/>
@@ -54,8 +66,9 @@ export function SystemIndicators() {
                 </box>
 
                 <popover
+                    onShow={() => lifecycle.start()}
                     onClosed={() => {
-                        powerModeRevealer.revealChild = false;
+                        lifecycle.stop()
                     }}
                 >
                     <Adw.Clamp
@@ -130,8 +143,11 @@ export function SystemIndicators() {
                                     css={`
                                         padding: ${Dimensions.smallestSpacing}px 0;
                                     `}
-                                    spacing={ Dimensions.normalSpacing}>
-                                    <AirplaneModeButtonQS minWidth={halfQuickSettingsWidth}/>
+                                    spacing={Dimensions.normalSpacing}>
+                                    <AirplaneModeButtonQS
+                                        parentLifeCycle={lifecycle}
+                                        minWidth={halfQuickSettingsWidth}
+                                    />
                                     <PowerModeButtonQS
                                         revealer={() => powerModeRevealer}
                                         onReveal={() => {
@@ -151,9 +167,11 @@ export function SystemIndicators() {
                                     css={`
                                         padding: ${Dimensions.smallestSpacing}px 0;
                                     `}
-                                    spacing={ Dimensions.normalSpacing}
+                                    spacing={Dimensions.normalSpacing}
                                 >
-                                    <DarkModeButtonQS minWidth={halfQuickSettingsWidth}/>
+                                    <DarkModeButtonQS
+                                        parentLifecycle={lifecycle}
+                                        minWidth={halfQuickSettingsWidth}/>
                                     <AccentColorButtonQS
                                         revealer={() => accentColorRevealer}
                                         onReveal={() => {
@@ -166,14 +184,16 @@ export function SystemIndicators() {
                                         padding: ${Dimensions.smallestSpacing}px 0;
                                     `}
                                 >
-                                    <AccentColorRevealerQS ref={(self: Gtk.Revealer) => (accentColorRevealer = self)}/>
+                                    <AccentColorRevealerQS
+                                        parentLifecycle={lifecycle}
+                                        ref={(self: Gtk.Revealer) => (accentColorRevealer = self)}/>
                                 </box>
 
                                 <box
                                     css={`
                                         padding: ${Dimensions.smallestSpacing}px 0;
                                     `}
-                                    spacing={ Dimensions.normalSpacing}
+                                    spacing={Dimensions.normalSpacing}
                                 >
                                     <DoNotDisturbButtonQS minWidth={halfQuickSettingsWidth}/>
                                     <BluetoothButtonQS minWidth={halfQuickSettingsWidth}/>

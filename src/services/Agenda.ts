@@ -1,10 +1,11 @@
-import {createPoll, interval} from "ags/time"
+import {interval, Timer} from "ags/time"
 import GLib from "gi://GLib"
 import EDataServer from "gi://EDataServer"
 import ECal from "gi://ECal"
 import ICalGLib from "gi://ICalGLib"
 import GObject, {getter, register} from "gnim/gobject"
 import {Log} from "../lib/Logger";
+import {Accessor, Setter, createState} from "ags";
 
 export type CalendarEvent = {
     summary: string
@@ -23,39 +24,47 @@ export default class Agenda extends GObject.Object {
         "notify::events": () => void
     }
 
+    #timerEventsState: Timer | null = null
+    #timerSourceRegistry: Timer | null = null
+    #timerSources: Timer | null = null
+    #timerClients: Timer | null = null
+
     #sourceRegistry: EDataServer.SourceRegistry | null = null
     #sources: EDataServer.Source[] = []
     #clients: ECal.Client[] = []
     #events: CalendarEvent[] = []
 
-    #eventsPoll = createPoll<CalendarEvent[]>(
-        [],
-        1000,
-        () => this.#listCalendarEvents(),
-    )
+
+    #eventsState: Accessor<CalendarEvent[]>
+    #setEventsState: Setter<CalendarEvent[]>
 
     constructor() {
         super()
+        const [events, setEvents] = createState<CalendarEvent[]>([])
+
+        this.#eventsState = events
+        this.#setEventsState = setEvents
+
         this.#initRegistry()
         this.#updateClients()
 
-        this.#eventsPoll.subscribe(() => {
-            this.#events = this.#eventsPoll.get()
+        this.#eventsState.subscribe(() => {
+            this.#events = this.#eventsState.get()
             this.notify("events")
         })
 
-        interval(5_000, () => {
-            this.#updateSourceRegistry()
-        })
-        interval((this.#sources.length + 1) * 1000, () => {
-            this.#updateSources()
-        })
-        interval((this.#clients.length + 1) * 1000, () => {
-            this.#updateClients()
-        })
+        this.initAllTimer()
     }
 
     static get_default() {
+        if (!instance) {
+            instance = new Agenda()
+            instance.stopAllTimer()
+        }
+        return instance
+    }
+
+    static get_with_timer_initialized() {
         if (!instance) instance = new Agenda()
         return instance
     }
@@ -82,6 +91,44 @@ export default class Agenda extends GObject.Object {
             this.#sourceRegistry = null
             this.#sources = []
         }
+    }
+
+    initAllTimer() {
+        if (this.#timerEventsState == null) {
+            this.#timerEventsState = interval(5_000, () => {
+                this.#setEventsState(this.#listCalendarEvents())
+            })
+        }
+
+        if (this.#timerSourceRegistry == null) {
+            this.#timerSourceRegistry = interval(5_000, () => {
+                this.#updateSourceRegistry()
+            })
+        }
+        if (this.#timerSources == null) {
+            this.#timerSources = interval((this.#sources.length + 1) * 1000, () => {
+                this.#updateSources()
+            })
+        }
+        if (this.#timerClients == null) {
+            this.#timerClients = interval((this.#clients.length + 1) * 1000, () => {
+                this.#updateClients()
+            })
+        }
+    }
+
+    stopAllTimer() {
+        this.#timerEventsState?.cancel()
+        this.#timerEventsState = null;
+
+        this.#timerSourceRegistry?.cancel()
+        this.#timerSourceRegistry = null;
+
+        this.#timerSources?.cancel()
+        this.#timerSources = null;
+
+        this.#timerClients?.cancel()
+        this.#timerClients = null;
     }
 
     #updateSourceRegistry() {
