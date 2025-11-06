@@ -30,7 +30,8 @@ export default function BrightnessQS() {
 
     return (
         <box spacing={Dimensions.smallSpacing}>
-            <BrightnessIcon onClicked={() => {}}/>
+            <BrightnessIcon onClicked={() => {
+            }}/>
             <slider
                 $={(self) => slider = self}
                 hexpand

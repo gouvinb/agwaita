@@ -29,7 +29,7 @@ export class Niri extends GObject.Object implements WM {
     #workspaces: Workspace[] = []
     #switchDebounceId: number | null = null
     #switchPendingIndex: number | null = null
-    #switchDebounceDelay = 50 // ms
+    #switchDebounceDelay = 50
     #workspaceEvent: number = WorkspaceEvent.Unsupported
 
     constructor() {
@@ -81,16 +81,6 @@ export class Niri extends GObject.Object implements WM {
         return this.#workspaceEvent
     }
 
-    #setWorkspaceEvent(v: number) {
-        if (this.#workspaceEvent === v) return
-        this.#workspaceEvent = v
-        try {
-            this.notify("workspace-event")
-        } catch (e) {
-            Log.e("Niri service", `Failed to notify workspace-event signal ${v}`, e)
-        }
-    }
-
     static get_default() {
         if (!instance) instance = new Niri()
         return instance
@@ -140,6 +130,16 @@ export class Niri extends GObject.Object implements WM {
                 return GLib.SOURCE_REMOVE
             })
         })
+    }
+
+    #setWorkspaceEvent(v: number) {
+        if (this.#workspaceEvent === v) return
+        this.#workspaceEvent = v
+        try {
+            this.notify("workspace-event")
+        } catch (e) {
+            Log.e("Niri service", `Failed to notify workspace-event signal ${v}`, e)
+        }
     }
 
     async #refreshWorkspaces() {

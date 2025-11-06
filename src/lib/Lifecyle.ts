@@ -33,5 +33,5 @@ export function createLifecycle(): Lifecycle {
         stopHandlers.clear()
     }
 
-    return { onStart, onStop, start, stop, dispose }
+    return {onStart, onStop, start, stop, dispose}
 }

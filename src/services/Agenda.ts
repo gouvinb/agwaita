@@ -5,7 +5,7 @@ import ECal from "gi://ECal"
 import ICalGLib from "gi://ICalGLib"
 import GObject, {getter, register} from "gnim/gobject"
 import {Log} from "../lib/Logger";
-import {Accessor, Setter, createState} from "ags";
+import {Accessor, createState, Setter} from "ags";
 
 export type CalendarEvent = {
     summary: string
@@ -56,19 +56,6 @@ export default class Agenda extends GObject.Object {
         this.initAllTimer()
     }
 
-    static get_default() {
-        if (!instance) {
-            instance = new Agenda()
-            instance.stopAllTimer()
-        }
-        return instance
-    }
-
-    static get_with_timer_initialized() {
-        if (!instance) instance = new Agenda()
-        return instance
-    }
-
     @getter(Array)
     get events(): CalendarEvent[] {
         return this.#events
@@ -82,15 +69,17 @@ export default class Agenda extends GObject.Object {
         return this.#clients
     }
 
-    #initRegistry() {
-        try {
-            this.#updateSourceRegistry()
-            this.#updateSources()
-        } catch (e) {
-            Log.e("Agenda service", `Failed to initialize registry sources or sources`, e)
-            this.#sourceRegistry = null
-            this.#sources = []
+    static get_default() {
+        if (!instance) {
+            instance = new Agenda()
+            instance.stopAllTimer()
         }
+        return instance
+    }
+
+    static get_with_timer_initialized() {
+        if (!instance) instance = new Agenda()
+        return instance
     }
 
     initAllTimer() {
@@ -129,6 +118,17 @@ export default class Agenda extends GObject.Object {
 
         this.#timerClients?.cancel()
         this.#timerClients = null;
+    }
+
+    #initRegistry() {
+        try {
+            this.#updateSourceRegistry()
+            this.#updateSources()
+        } catch (e) {
+            Log.e("Agenda service", `Failed to initialize registry sources or sources`, e)
+            this.#sourceRegistry = null
+            this.#sources = []
+        }
     }
 
     #updateSourceRegistry() {
@@ -191,7 +191,7 @@ export default class Agenda extends GObject.Object {
                                 allEvents.push({
                                     summary: generatedComp.get_summary() ?? "",
                                     desc: generatedComp.get_description(),
-                                    // @ts-expect-error extension non typée dans les d.ts de EDataServer
+                                    // @ts-expect-error untyped extension in EDataServer's d.ts
                                     color: client.source.get_extension(EDataServer.SOURCE_EXTENSION_CALENDAR).dup_color(),
                                     isAllDay: generatedComp.get_duration().as_ical_string() === oneDay.as_ical_string(),
                                     start: GLib.DateTime.new_from_unix_utc(instanceStart.as_timet())!,

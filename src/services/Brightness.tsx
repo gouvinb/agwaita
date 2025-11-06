@@ -21,7 +21,7 @@ export default class Brightness extends GObject.Object {
 
     #pendingValue: number | null = null
     #debounceId: number | null = null
-    #debounceDelay = 33 // ms
+    #debounceDelay = 33
 
     constructor() {
         super()

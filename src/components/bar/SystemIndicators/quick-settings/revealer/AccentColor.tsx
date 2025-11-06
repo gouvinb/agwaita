@@ -9,7 +9,7 @@ import {Lifecycle} from "../../../../../lib/Lifecyle";
 export default function AccentColorRevealerQS(
     {ref, parentLifecycle = null}: {
         ref?: (element: Gtk.Revealer) => void,
-    parentLifecycle?: Lifecycle | null,
+        parentLifecycle?: Lifecycle | null,
     }
 ) {
 

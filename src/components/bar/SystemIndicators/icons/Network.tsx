@@ -83,7 +83,7 @@ export default function NetworkIcon() {
 
             return {type: "none", connected: false};
         } catch (error) {
-            Log.e("NetworkIcon", `Cannot get network state`,  error);
+            Log.e("NetworkIcon", `Cannot get network state`, error);
             return {type: "none", connected: false};
         }
     }

@@ -19,7 +19,7 @@ export function DataTimePopover(
 
     const [rawDateTime, setRawDateTime] = createState(GLib.DateTime.new_now_local())
 
-    let rawDateTimeTimer : Timer | null = null
+    let rawDateTimeTimer: Timer | null = null
 
     const [calendarSelectedDate, setCalendarSelectedDate] = createState<GLib.DateTime>(rawDateTime.get())
     const calendarSelectedDateFormatted = calendarSelectedDate.as((date) => date.format("%A %d %b %Y")!.capitalize())
@@ -66,19 +66,19 @@ export function DataTimePopover(
         });
     }
 
-    const updateDaySelected = (calendar : Gtk.Calendar) => setCalendarSelectedDate(calendar.get_date())
-        parentLifecycle.onStart(() => {
-            rawDateTimeTimer = interval(
-                1000,
-                () => setRawDateTime(GLib.DateTime.new_now_local()),
-            )
-            agenda.initAllTimer()
-        })
-        parentLifecycle.onStop(() => {
-            rawDateTimeTimer?.cancel()
-            rawDateTimeTimer = null
-            agenda.stopAllTimer()
-        })
+    const updateDaySelected = (calendar: Gtk.Calendar) => setCalendarSelectedDate(calendar.get_date())
+    parentLifecycle.onStart(() => {
+        rawDateTimeTimer = interval(
+            1000,
+            () => setRawDateTime(GLib.DateTime.new_now_local()),
+        )
+        agenda.initAllTimer()
+    })
+    parentLifecycle.onStop(() => {
+        rawDateTimeTimer?.cancel()
+        rawDateTimeTimer = null
+        agenda.stopAllTimer()
+    })
 
     onCleanup(() => {
     })
