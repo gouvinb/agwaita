@@ -3,6 +3,7 @@ import {WM, Workspace, WorkspaceEvent} from "../WM"
 import GObject, {getter, register} from "gnim/gobject"
 import GLib from "gi://GLib"
 import {Accessor} from "gnim"
+import {Log} from "../../../lib/Logger";
 
 interface NiriRawWorkspace {
     id: number,
@@ -33,7 +34,14 @@ export class Niri extends GObject.Object implements WM {
 
     constructor() {
         super()
-        const proc = subprocess("niri msg -j event-stream")
+        const proc = subprocess(
+            "niri msg -j event-stream",
+            (_) => {
+            },
+            (stderr) => {
+                Log.e("Niri service", stderr)
+            },
+        )
 
         proc.connect("stdout", (_, rawJSON: string) => {
             if (rawJSON == undefined) {
@@ -59,7 +67,8 @@ export class Niri extends GObject.Object implements WM {
             }
         })
 
-        this.#refreshWorkspaces().catch(printerr)
+        this.#refreshWorkspaces()
+            .catch((err) => Log.e("Niri service", `Failed to refresh workspaces`, err))
     }
 
     @getter(Array)
@@ -77,9 +86,8 @@ export class Niri extends GObject.Object implements WM {
         this.#workspaceEvent = v
         try {
             this.notify("workspace-event")
-            this.emit("workspace-event", v)
         } catch (e) {
-            printerr(e)
+            Log.e("Niri service", `Failed to notify workspace-event signal ${v}`, e)
         }
     }
 
@@ -108,7 +116,7 @@ export class Niri extends GObject.Object implements WM {
         try {
             await this.#refreshWorkspaces()
         } catch (error) {
-            printerr(`Niri listsWorkspaces refresh error: ${error}`)
+            Log.e("Niri service", `Failed to refresh workspaces`, error)
         }
         return this.#workspaces
     }
@@ -126,7 +134,7 @@ export class Niri extends GObject.Object implements WM {
                 execAsync(`niri msg action focus-workspace ${i}`)
                     .then(() => resolve())
                     .catch((e) => {
-                        printerr(`Niri switchToWorkspace error: ${e}`)
+                        Log.e("Niri service", `Failed to switch to workspace ${i}`, e)
                         reject(e)
                     })
                 return GLib.SOURCE_REMOVE

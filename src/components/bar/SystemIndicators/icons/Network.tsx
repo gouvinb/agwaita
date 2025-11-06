@@ -2,6 +2,7 @@ import {createState} from "ags"
 import {interval} from "ags/time"
 import GLib from "gi://GLib"
 import {Gtk} from "ags/gtk4";
+import {Log} from "../../../../lib/Logger";
 
 type NetworkState = {
     type: "wired" | "wifi" | "none"
@@ -82,7 +83,7 @@ export default function NetworkIcon() {
 
             return {type: "none", connected: false};
         } catch (error) {
-            printerr(error);
+            Log.e("NetworkIcon", `Cannot get network state`,  error);
             return {type: "none", connected: false};
         }
     }

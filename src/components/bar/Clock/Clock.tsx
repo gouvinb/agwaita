@@ -5,7 +5,7 @@ import GLib from "gi://GLib"
 import Adw from "gi://Adw"
 import {notifications, setNotifications} from "../../../app/Notifications";
 import Notification from "../../notifications/Notification";
-import {Agenda} from "./DataTimePopover/Agenda";
+import {DataTimePopover} from "./DataTimePopover/DateTimePopover";
 import {Dimensions} from "../../../lib/ui/Diemensions";
 
 export function Clock(
@@ -125,7 +125,7 @@ export function Clock(
                             maximumSize={Dimensions.notificationWidth + 40}
                         >
                             <Gtk.Separator orientation={Gtk.Orientation.VERTICAL}/>
-                            <Agenda
+                            <DataTimePopover
                                 refCalendar={(instance) => calendar = instance}
                                 popoverRequestHeight={popoverRequestHeight}
                             />

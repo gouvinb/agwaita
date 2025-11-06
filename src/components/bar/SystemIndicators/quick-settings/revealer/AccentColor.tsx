@@ -3,6 +3,7 @@ import {createState} from "ags"
 import {interval} from "ags/time"
 import {shAsync} from "../../../../../lib/ExternalCommand";
 import {Dimensions} from "../../../../../lib/ui/Diemensions";
+import {Log} from "../../../../../lib/Logger";
 
 export default function AccentColorRevealerQS(
     {ref}: { ref?: (element: Gtk.Revealer) => void }
@@ -46,7 +47,7 @@ export default function AccentColorRevealerQS(
             .then(() => {
                 updateAccentColorState()
             })
-            .catch((err) => printerr(err));
+            .catch((err) => Log.e("AccentColorRevealerQS", `Cannot set ${color} accent color`, err));
     }
 
     function updateAccentColorState() {
@@ -55,7 +56,7 @@ export default function AccentColorRevealerQS(
                 setAccentColor(output.trim().replaceAll("'", ""))
                 updateTB(accentColor.get())
             })
-            .catch((err) => printerr(err));
+            .catch((err) => Log.e("AccentColorRevealerQS", `Cannot get accent color`, err));
     }
 
     function resolveButtonClass(btn: Gtk.ToggleButton) {

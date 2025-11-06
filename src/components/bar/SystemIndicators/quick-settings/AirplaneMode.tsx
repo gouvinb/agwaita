@@ -3,6 +3,7 @@ import {interval} from "ags/time"
 import {createState} from "ags"
 import DesktopScriptLib from "../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Log} from "../../../../lib/Logger";
 
 export default function AirplaneModeButtonQS(
     {minWidth}: { minWidth: number },
@@ -20,7 +21,7 @@ export default function AirplaneModeButtonQS(
                     setIcon("airplane-mode-symbolic")
                 }
             })
-            .catch((err) => printerr(err));
+            .catch((err) => Log.e("AirplaneModeButtonQS", `Cannot get airplane mode status`, err))
     }
 
     interval(1000, () => {
@@ -40,7 +41,7 @@ export default function AirplaneModeButtonQS(
                     .then(_ => {
                         updateAirplaneModeState()
                     })
-                    .catch((err) => printerr(err));
+                    .catch((err) => Log.e("AirplaneModeButtonQS", `Cannot toggle airplane mode`, err))
             }}
         >
             <box spacing={Dimensions.normalSpacing}>

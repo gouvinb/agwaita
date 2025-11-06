@@ -1,8 +1,8 @@
 import {Gtk} from "ags/gtk4";
 import {Accessor, For, With} from "ags";
-import {CalendarEvent} from "./Agenda";
 import "../../../../lib/extension/GLibDateTime"
 import "../../../../lib/extension/String"
+import {CalendarEvent} from "../../../../services/Agenda";
 
 export function EventList(
     {

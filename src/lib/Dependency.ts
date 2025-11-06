@@ -1,5 +1,6 @@
 import {exec} from "ags/process"
 import GLib from "gi://GLib"
+import {Log} from "./Logger";
 
 /**
  * @returns true if all the `bins` are found
@@ -10,7 +11,7 @@ export function dependencies(...bins: string[]) {
     })
 
     if (missing.length > 0) {
-        printerr("Missing dependencies:", missing.join(", "))
+        Log.c("ags-shell", `Missing dependencies: ${missing.join(", ")}`)
     }
 
     return missing.length === 0
@@ -21,7 +22,7 @@ export function dependencies(...bins: string[]) {
  */
 export function customDependencies(fileTest: GLib.FileTest = GLib.FileTest.EXISTS, ...files: string[]) {
     if (files.length === 0) {
-        printerr("Missing dependencies: no files provided")
+        Log.c("ags-shell", "Missing dependencies: no files provided")
         return false
     }
 
@@ -30,7 +31,7 @@ export function customDependencies(fileTest: GLib.FileTest = GLib.FileTest.EXIST
     })
 
     if (missing.length > 0) {
-        printerr("Missing dependencies:", missing.join(", "))
+        Log.c("ags-shell", `Missing dependencies: ${missing.join(", ")}`)
     }
 
     return missing.length === 0

@@ -3,6 +3,7 @@ import {interval} from "ags/time"
 import {createState} from "ags"
 import {shAsync} from "../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Log} from "../../../../lib/Logger";
 
 export default function DarkModeButtonQS(
     {minWidth}: { minWidth: number },
@@ -14,7 +15,7 @@ export default function DarkModeButtonQS(
             .then(output => {
                 setMode(output.trim().replaceAll("'", ""))
             })
-            .catch((err) => printerr(err))
+            .catch((err) => Log.e("DarkModeButtonQS", `Cannot get color scheme`, err))
     }
 
     interval(1000, () => {
@@ -30,13 +31,14 @@ export default function DarkModeButtonQS(
             `}
             active={mode.get() == "prefer-dark"}
             onClicked={async () => {
-                await shAsync(`gsettings set org.gnome.desktop.interface color-scheme ${mode.get() == "prefer-dark" ? "prefer-light" : "prefer-dark"}`)
-                    .then(_ => {
-                        updateDarkModeState()
-                    })
-                    .catch((err) => printerr(err));
-                await shAsync(`kvantummanager --set ${mode.get() == "prefer-dark" ? "KvLibadwaita" : "KvLibadwaitaDark"}`)
-                    .catch((err) => printerr(err));
+                const adwColorScheme = mode.get() == "prefer-dark" ? "prefer-light" : "prefer-dark"
+                const kvColorScheme = mode.get() == "prefer-dark" ? "KvLibadwaita" : "KvLibadwaitaDark"
+
+                await shAsync(`gsettings set org.gnome.desktop.interface color-scheme ${adwColorScheme}`)
+                    .then(_ => updateDarkModeState())
+                    .catch((err) => Log.e("DarkModeButtonQS", `Cannot set ${adwColorScheme} color scheme`, err))
+                await shAsync(`kvantummanager --set ${kvColorScheme}`)
+                    .catch((err) => Log.e("DarkModeButtonQS", `Cannot set ${kvColorScheme} color scheme`, err))
             }}
         >
             <box spacing={Dimensions.normalSpacing}>

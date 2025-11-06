@@ -1,6 +1,7 @@
 import {Gdk, Gtk} from "ags/gtk4"
 import {createState, For} from "ags"
 import currentWM, {WM, Workspace} from "../../services/wm/WM"
+import {Log} from "../../lib/Logger";
 
 type WorkspaceUi = {
     index: number,
@@ -18,7 +19,7 @@ export default function Workspaces({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
 
     if ("connect" in wm) {
         const workspaceEventSignalId = (wm as WM).connect("notify::workspace-event", () => updateWorkspaces())
-        print(`Connected to workspace event signal with id: ${workspaceEventSignalId}`)
+        Log.i("Workspaces", `Connected to workspace event signal with id: ${workspaceEventSignalId}`)
     }
 
     function updateWorkspaces() {
@@ -38,7 +39,7 @@ export default function Workspaces({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
                         }))
                 )
             })
-            .catch((err: unknown) => printerr("Failed to get workspaces", err))
+            .catch((err) => Log.e("Workspaces", `Failed to list workspaces`, err))
     }
 
     function resolveWorkspaceClasses(
@@ -69,10 +70,9 @@ export default function Workspaces({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
                     `}
                     cssClasses={resolveWorkspaceClasses(workspaceUi.urgent, workspaceUi.focused, workspaceUi.active)}
                     onClicked={() => {
-                        print(`Switching to workspace ${workspaceUi.index}`)
                         wm.switchToWorkspace(workspaceUi.index)
                             .then(() => updateWorkspaces())
-                            .catch((err: unknown) => printerr("Failed to switch to workspace", err))
+                            .catch((err: unknown) => Log.e("Workspaces", `Failed to switch to workspace ${workspaceUi.index}`, err))
                     }}
                     label={workspaceUi.name}
                 />}
