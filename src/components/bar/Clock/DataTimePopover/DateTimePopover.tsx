@@ -103,9 +103,9 @@ export function DataTimePopover(
                 propagateNaturalWidth
                 propagateNaturalHeight
                 hexpand
-                widthRequest={Dimensions.notificationWidth + 40}
+                vexpand
+                widthRequest={Dimensions.notificationWidth + 24}
                 max_content_height={popoverRequestHeight / 2 + 24}
-                max_content_width={Dimensions.notificationWidth + 40}
             >
                 <box orientation={Gtk.Orientation.VERTICAL}>
                     <box>

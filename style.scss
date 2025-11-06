@@ -157,6 +157,10 @@
     color: var(--window-fg-color);
   }
 
+  popover contents {
+    padding: 0;
+  }
+
   .workspaces {
     button.workspace {
       // fix: dark mode

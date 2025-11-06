@@ -57,6 +57,9 @@ export function Clock(
                         <With value={notifications}>
                             {(notificationList) => notificationList.length > 0 && (
                                 <box
+                                    css={`
+                                        padding: ${Dimensions.normalSpacing}px;
+                                    `}
                                     orientation={Gtk.Orientation.VERTICAL}
                                     spacing={Dimensions.smallSpacing}
                                 >
@@ -125,7 +128,12 @@ export function Clock(
 
                     <box>
                         <Adw.Clamp
-                            maximumSize={Dimensions.notificationWidth + 40}
+                            css={`
+                                padding: ${Dimensions.normalSpacing}px;
+                            `}
+                            orientation={Gtk.Orientation.HORIZONTAL}
+                            widthRequest={Dimensions.notificationWidth + 24}
+                            maximumSize={Dimensions.notificationWidth + 24}
                         >
                             <DataTimePopover
                                 parentLifecycle={popoverLifecycle}
