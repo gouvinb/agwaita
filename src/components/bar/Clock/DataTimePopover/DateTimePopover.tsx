@@ -6,7 +6,7 @@ import Agenda, {CalendarEvent} from "../../../../services/Agenda"
 import {Calendar} from "./Calendar";
 import {EventList} from "./EventList";
 import {DateTimeExt} from "../../../../lib/extension/GLibDateTime";
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 import {Lifecycle} from "../../../../lib/Lifecyle";
 
 export function DataTimePopover(

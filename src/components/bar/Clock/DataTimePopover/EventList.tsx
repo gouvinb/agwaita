@@ -3,7 +3,7 @@ import {Accessor, For, With} from "ags";
 import "../../../../lib/extension/GLibDateTime"
 import "../../../../lib/extension/String"
 import {CalendarEvent} from "../../../../services/Agenda";
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export function EventList(
     {

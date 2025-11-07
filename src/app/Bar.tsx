@@ -6,7 +6,7 @@ import SystemdUnitFailed from "../components/bar/SystemdUnitFailed"
 import SysTray from "../components/bar/SysTray"
 import {SystemIndicators} from "../components/bar/SystemIndicators/SystemIndicators"
 import Workspaces from "../components/bar/Workspaces";
-import {Dimensions} from "../lib/ui/Diemensions";
+import {Dimensions} from "../lib/ui/Dimensions";
 
 export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
     const {TOP, LEFT, RIGHT} = Astal.WindowAnchor
@@ -47,18 +47,16 @@ export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
                         $type="center"
                         spacing={Dimensions.smallSpacing}
                     >
-                        <Clock
-                            popoverRequestHeight={Dimensions.notificationCenterHeight}
-                        />
+                        <Clock popoverRequestHeight={Dimensions.notificationCenterHeight}/>
                     </box>
 
                     <box
                         $type="end"
                         spacing={Dimensions.smallSpacing}
                     >
-                        <SystemdUnitFailed/>
-                        <SysTray/>
-                        <SystemIndicators/>
+                        <box><SystemdUnitFailed/></box>
+                        <box><SysTray/></box>
+                        <box><SystemIndicators/></box>
                     </box>
 
                 </centerbox>

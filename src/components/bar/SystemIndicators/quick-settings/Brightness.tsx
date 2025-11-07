@@ -2,7 +2,7 @@ import BrightnessIcon from "../icons/Brightness"
 import Brightness from "../../../../services/Brightness"
 import GLib from "gi://GLib?version=2.0"
 import {Astal} from "ags/gtk4"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function BrightnessQS() {
     const brightnessInstance = Brightness.get_default()

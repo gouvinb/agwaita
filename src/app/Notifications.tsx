@@ -3,7 +3,7 @@ import app from "ags/gtk4/app"
 import {Accessor, createBinding, createComputed, createState, For, onCleanup} from "ags"
 import Notification from "../components/notifications/Notification"
 import AstalNotifd from "gi://AstalNotifd"
-import {Dimensions} from "../lib/ui/Diemensions";
+import {Dimensions} from "../lib/ui/Dimensions";
 
 
 export const [notifications, setNotifications] = createState(

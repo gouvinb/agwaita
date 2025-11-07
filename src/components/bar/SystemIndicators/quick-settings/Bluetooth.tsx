@@ -1,6 +1,6 @@
 import {Gtk} from "ags/gtk4"
 import {shAsync} from "../../../../lib/ExternalCommand"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function BluetoothButtonQS(
     {minWidth}: { minWidth: number },

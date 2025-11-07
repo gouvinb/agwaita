@@ -1,6 +1,6 @@
 import AstalNotifd from "gi://AstalNotifd"
 import DoNotDisturbIcon from "../icons/DoNotDisturb"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function DoNotDisturbButtonQS(
     {minWidth}: { minWidth: number },

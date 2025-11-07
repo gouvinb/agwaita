@@ -1,7 +1,7 @@
 import {createBinding, For, onCleanup} from "ags"
 import {Gtk} from "ags/gtk4"
 import Tray from "gi://AstalTray"
-import {Dimensions} from "../../lib/ui/Diemensions";
+import {Dimensions} from "../../lib/ui/Dimensions";
 
 export default function SysTray() {
     const tray = Tray.get_default()

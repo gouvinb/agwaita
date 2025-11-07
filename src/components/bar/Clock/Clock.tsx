@@ -6,7 +6,7 @@ import Adw from "gi://Adw"
 import {notifications, setNotifications} from "../../../app/Notifications";
 import Notification from "../../notifications/Notification";
 import {DataTimePopover} from "./DataTimePopover/DateTimePopover";
-import {Dimensions} from "../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../lib/ui/Dimensions";
 import {createLifecycle} from "../../../lib/Lifecyle";
 
 export function Clock(

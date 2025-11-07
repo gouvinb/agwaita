@@ -19,7 +19,7 @@ import {AirplaneModeButtonQS} from "./quick-settings/AirplaneMode";
 import DoNotDisturbButtonQS from "./quick-settings/DoNotDisturb";
 import AccentColorButtonQS from "./quick-settings/AccentColor";
 import AccentColorRevealerQS from "./quick-settings/revealer/AccentColor";
-import {Dimensions} from "../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../lib/ui/Dimensions";
 import {createLifecycle} from "../../../lib/Lifecyle";
 import {onCleanup} from "ags";
 

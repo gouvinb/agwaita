@@ -2,7 +2,7 @@ import {Gtk} from "ags/gtk4"
 import {interval, Timer} from "ags/time"
 import {createState} from "ags"
 import DesktopScriptLib from "../../../../lib/ExternalCommand"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 import {Log} from "../../../../lib/Logger";
 import {Lifecycle} from "../../../../lib/Lifecyle";
 

@@ -4,7 +4,7 @@ import GLib from "gi://GLib"
 import Adw from "gi://Adw"
 import Pango from "gi://Pango"
 import AstalNotifd from "gi://AstalNotifd"
-import {Dimensions} from "../../lib/ui/Diemensions";
+import {Dimensions} from "../../lib/ui/Dimensions";
 import {Shapes} from "../../lib/ui/Shapes";
 
 

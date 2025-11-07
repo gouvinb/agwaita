@@ -2,7 +2,7 @@ import {createBinding, createState, With} from "ags"
 import AstalBattery from "gi://AstalBattery"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4";
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function BatteryIcon() {
     const battery = AstalBattery.get_default()

@@ -2,7 +2,7 @@ import {createBinding, createState} from "ags"
 import AstalWp from "gi://AstalWp"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function AudioIcon(
     {onClicked}: { onClicked?: () => void }

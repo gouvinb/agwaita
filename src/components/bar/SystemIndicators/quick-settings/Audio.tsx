@@ -3,7 +3,7 @@ import AstalWp from "gi://AstalWp"
 import GLib from "gi://GLib?version=2.0"
 import {Astal} from "ags/gtk4"
 import {shAsync} from "../../../../lib/ExternalCommand"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function AudioQS() {
     const {defaultSpeaker: speaker} = AstalWp.get_default()!

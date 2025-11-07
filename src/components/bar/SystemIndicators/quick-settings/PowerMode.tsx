@@ -1,6 +1,6 @@
 import {Gtk} from "ags/gtk4"
 import PowerModeIcon from "../icons/PowerMode"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 
 export default function PowerModeButtonQS(
     {revealer, onReveal, minWidth}: {

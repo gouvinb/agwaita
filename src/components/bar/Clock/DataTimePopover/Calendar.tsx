@@ -2,7 +2,7 @@ import {Gtk} from "ags/gtk4";
 import {interval, Timer} from "ags/time"
 import GLib from "gi://GLib"
 import "../../../../lib/extension/String"
-import {Dimensions} from "../../../../lib/ui/Diemensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions";
 import {Lifecycle} from "../../../../lib/Lifecyle";
 import {createState} from "ags";
 

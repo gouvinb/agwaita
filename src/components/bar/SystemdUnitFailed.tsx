@@ -1,7 +1,6 @@
 import {createState, With} from "ags"
 import {shAsync} from "../../lib/ExternalCommand"
 import {interval} from "ags/time"
-import {Dimensions} from "../../lib/ui/Diemensions";
 import {Gtk} from "ags/gtk4";
 
 export default function SystemdUnitFailed() {
