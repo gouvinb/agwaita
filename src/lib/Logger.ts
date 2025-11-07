@@ -37,7 +37,7 @@ export const Log = new class {
     private printLog(level: LogLevelValue, tag: string, msg: string, err?: Error | unknown | null | undefined) {
         const date = new Date()
 
-        const log = `${date.toLocaleDateString()}|${level}|${tag.substring(0, 25).padEnd(25, "_")}|${msg}${err ? `: ${err}` : ""}`
+        const log = `${date.toLocaleString()}|${level}|${tag.substring(0, 25).padEnd(25, "_")}|${msg}${err ? `: ${err}` : ""}`
 
         if (level === "C" || level === "E" || level === "W") {
             printerr(log)
