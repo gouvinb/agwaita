@@ -4,11 +4,15 @@ import {interval} from "ags/time"
 import {Gtk} from "ags/gtk4";
 
 export default function SystemdUnitFailed() {
-    const [_, setFailedUnit] = createState<string[]>([]);
+    const [_failedUnit, setFailedUnit] = createState<string[]>([]);
     const [failedUnitCount, setFailedUnitCount] = createState<number>(0);
     const [failedUnitVisible, setFailedUnitVisible] = createState<boolean>(true);
     const [failedUnitSuccess, setFailedUnitSuccess] = createState<boolean>(true);
     const [icon, setIcon] = createState<string>("");
+
+    const failedUnit = _failedUnit.as(units =>
+        `${units.map((unit, index) => `${unit.replace('●', `${index + 1}. `)}`).join('\n')}`
+    );
 
     async function updateFailedUnit() {
         try {
@@ -57,26 +61,28 @@ export default function SystemdUnitFailed() {
 
     return (
         <With value={failedUnitVisible}>
-            {(failedUnit) => (
-                failedUnit && <box
-                    css={`
-                        padding-right: ${Dimensions.smallSpacing}px;
-                    `}>
-                    <image
-                        iconName={icon}
-                        iconSize={Gtk.IconSize.NORMAL}
-                    />
-                    <With value={failedUnitSuccess}>
-                        {(failedUnitSuccess) => (
-                            failedUnitSuccess && <label
-                                use_markup
-                                label={failedUnitCount.as(count =>
-                                    ` <span baseline_shift="superscript" font_scale="superscript">${count}</span>`
-                                )}
-                            />
-                        )}
-                    </With>
-                </box>
+            {(value) => (
+                value && <button
+                    tooltipMarkup={failedUnit}
+                    onClicked={() => shAsync("systemctl --user reset-failed")}
+                >
+                    <box orientation={Gtk.Orientation.HORIZONTAL}>
+                        <image
+                            iconName={icon}
+                            iconSize={Gtk.IconSize.NORMAL}
+                        />
+                        <With value={failedUnitSuccess}>
+                            {(failedUnitSuccess) => (
+                                failedUnitSuccess && <label
+                                    use_markup
+                                    label={failedUnitCount.as(count =>
+                                        ` <span baseline_shift="superscript" font_scale="superscript">${count}</span>`
+                                    )}
+                                />
+                            )}
+                        </With>
+                    </box>
+                </button>
             )}
         </With>
     );
