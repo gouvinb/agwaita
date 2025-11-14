@@ -1,23 +1,22 @@
 import {Gtk} from "ags/gtk4"
-import {shAsync} from "../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
+import app from "ags/gtk4/app";
 
 export default function BluetoothButtonQS(
     {minWidth}: { minWidth: number },
 ) {
-    async function notifyError() {
-        shAsync(`notify-send.sh "Bluetooth" "Cannot open Overskride" -i io.github.kaii_lb.Overskride -a Overskride -t 5000`)
-    }
-
-
     return (
         <button
             css={`
                 min-width: ${minWidth}px;
             `}
             onClicked={async () => {
-                await shAsync(`overskride`)
-                    .catch((_) => notifyError())
+                const bluetoothWindow = app.get_window("bluetoothctl.gui")
+                if (!bluetoothWindow) {
+                    throw "bluetoothctl.gui window not found"
+                }
+                bluetoothWindow.show()
+
             }}
         >
             <box spacing={Dimensions.normalSpacing}>

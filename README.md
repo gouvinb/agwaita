@@ -112,7 +112,7 @@ https://github.com/user-attachments/assets/c62d139e-97db-40b1-9957-5b8bfa0a4d12
         - [x] A button for do not disturb mode
         - [-] A button for Bluetooth with a dropdown menu to manages devices
             - [x] Button
-            - [-] Dropdown (for now, ags-shell redirects to overskride)
+            - [-] Dropdown (for now, ags-shell redirects to alpha bluetooth manager window)
 
 ### - [ ] Application launcher
 

@@ -6,6 +6,7 @@ import {GlobalRequestHandler} from "./src/requesthandler/GlobalRequestHandler";
 import {createBinding, For, This} from "ags"
 import Notifications from "./src/app/Notifications";
 import {customExecutableDependencies, dependencies} from "./src/lib/Dependency";
+import BluetoothManager from "./src/app/BluetoothManager";
 
 app.start({
     css: style,
@@ -24,7 +25,6 @@ app.start({
             "niri",
             "gsettings",
             "pavucontrol",
-            "overskride",
             "kvantummanager",
             "systemctl",
             "swaylock",
@@ -36,6 +36,8 @@ app.start({
         }
 
         const monitors = createBinding(app, "monitors")
+
+        BluetoothManager()
 
         Notifications()
 
