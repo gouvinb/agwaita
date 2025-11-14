@@ -34,28 +34,28 @@ export class BarRequestHandler implements RequestHandler {
             this.help()
         } else if (cmd == "toggle") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             this.bar.visible = !this.bar.visible
             return this.response(this.bar.visible ? "hide" : "show")
         } else if (cmd == "show") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             this.bar.visible = true
             return this.response("show")
         } else if (cmd == "hide") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             this.bar.visible = false
             return this.response("hide")
         } else if (cmd == "visible") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             return this.response(this.bar.visible.toString())

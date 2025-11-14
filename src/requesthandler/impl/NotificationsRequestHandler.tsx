@@ -27,13 +27,13 @@ export class NotificationsRequestHandler implements RequestHandler {
             this.help()
         } else if (cmd == "count") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             return this.response(this.notifd.get_notifications().length.toString())
         } else if (cmd == "dismiss-last") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             if (this.notifd.get_notifications().length == 0) {
@@ -43,7 +43,7 @@ export class NotificationsRequestHandler implements RequestHandler {
             this.notifd.get_notifications()[0]!.dismiss()
         } else if (cmd == "dnd") {
             if (arg != null) {
-                throw `Argument is missing for ${cmd}`
+                throw `Unknown argument: ${arg} for ${cmd}`
             }
 
             this.notifd.dontDisturb = !this.notifd.dontDisturb
