@@ -37,6 +37,7 @@ export default class Agenda extends GObject.Object {
 
     #eventsState: Accessor<CalendarEvent[]>
     #setEventsState: Setter<CalendarEvent[]>
+    #eventsSubscription: (() => void) | null = null
 
     constructor() {
         super()
@@ -48,12 +49,10 @@ export default class Agenda extends GObject.Object {
         this.#initRegistry()
         this.#updateClients()
 
-        this.#eventsState.subscribe(() => {
+        this.#eventsSubscription = this.#eventsState.subscribe(() => {
             this.#events = this.#eventsState.get()
             this.notify("events")
         })
-
-        this.initAllTimer()
     }
 
     @getter(Array)
@@ -72,17 +71,27 @@ export default class Agenda extends GObject.Object {
     static get_default() {
         if (!instance) {
             instance = new Agenda()
-            instance.stopAllTimer()
         }
         return instance
     }
 
     static get_with_timer_initialized() {
-        if (!instance) instance = new Agenda()
+        if (!instance) {
+            instance = new Agenda()
+            instance.initAllTimer()
+        }
         return instance
     }
 
     initAllTimer() {
+        if (!this.#sourceRegistry) {
+            this.#initRegistry()
+        }
+
+        if (this.#clients.length === 0) {
+            this.#updateClients()
+        }
+
         if (this.#timerEventsState == null) {
             this.#timerEventsState = interval(5_000, () => {
                 this.#setEventsState(this.#listCalendarEvents())
@@ -118,6 +127,31 @@ export default class Agenda extends GObject.Object {
 
         this.#timerClients?.cancel()
         this.#timerClients = null;
+
+        if (this.#eventsSubscription) {
+            this.#eventsSubscription()
+            this.#eventsSubscription = null
+        }
+
+        this.#clients.forEach(client => {
+            try {
+                client.run_dispose()
+            } catch (e) {
+                Log.e("Agenda service", "Error disposing client", e)
+            }
+        })
+        this.#clients = []
+
+        if (this.#sourceRegistry) {
+            try {
+                this.#sourceRegistry.run_dispose()
+            } catch (e) {
+                Log.e("Agenda service", "Error disposing source registry", e)
+            }
+            this.#sourceRegistry = null
+        }
+
+        this.#sources = []
     }
 
     #initRegistry() {
@@ -132,6 +166,13 @@ export default class Agenda extends GObject.Object {
     }
 
     #updateSourceRegistry() {
+        if (this.#sourceRegistry) {
+            try {
+                this.#sourceRegistry.run_dispose()
+            } catch (e) {
+                Log.e("Agenda service", "Error disposing old source registry", e)
+            }
+        }
         this.#sourceRegistry = EDataServer.SourceRegistry.new_sync(null)
     }
 
