@@ -3,15 +3,22 @@ import {createState} from "ags"
 import {Gtk} from "../../../../../../../../../usr/share/ags/js/lib/gtk4";
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
+interface BrightnessIconProps {
+    onClicked?: () => void,
+    brightness: Brightness
+}
+
 export default function BrightnessIcon(
-    {onClicked}: { onClicked?: () => void }
+    {
+        onClicked,
+        brightness,
+    }: BrightnessIconProps
 ) {
-    const brightnessInstance = Brightness.get_default()
 
-    const [icon, setIcon] = createState<string>(resolveIcon(brightnessInstance.screen))
+    const [icon, setIcon] = createState<string>(resolveIcon(brightness.screen))
 
-    brightnessInstance.connect("notify::screen", () => {
-        const newIcon = resolveIcon(brightnessInstance.screen)
+    brightness.connect("notify::screen", () => {
+        const newIcon = resolveIcon(brightness.screen)
         if (icon.get() !== newIcon) {
             setIcon(newIcon)
         }

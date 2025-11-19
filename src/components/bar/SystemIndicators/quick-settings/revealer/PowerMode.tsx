@@ -3,8 +3,12 @@ import PowerProfiles from "gi://AstalPowerProfiles"
 import {createBinding, With} from "ags"
 import {Dimensions} from "../../../../../lib/ui/Dimensions";
 
+interface PowerModeRevealerQSProps {
+    ref?: (element: Gtk.Revealer) => void,
+}
+
 export default function PowerModeRevealerQS(
-    {ref}: { ref?: (element: Gtk.Revealer) => void }
+    {ref}: PowerModeRevealerQSProps
 ) {
     const powerprofiles = PowerProfiles.get_default()
 

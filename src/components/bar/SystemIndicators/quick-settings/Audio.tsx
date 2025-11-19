@@ -5,7 +5,11 @@ import {Astal} from "ags/gtk4"
 import {shAsync} from "../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
-export default function AudioQS() {
+interface AudioQsProps {
+    wp: AstalWp.Wp
+}
+
+export default function AudioQS({wp}: AudioQsProps) {
     const {defaultSpeaker: speaker} = AstalWp.get_default()!
 
     let slider: Astal.Slider
@@ -31,7 +35,10 @@ export default function AudioQS() {
 
     return (
         <box spacing={Dimensions.smallSpacing}>
-            <AudioIcon onClicked={() => shAsync("pavucontrol")}/>
+            <AudioIcon
+                wp={wp}
+                onClicked={() => shAsync("pavucontrol")}
+            />
             <slider
                 $={(self) => (slider = self)}
                 min={0}

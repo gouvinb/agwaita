@@ -5,16 +5,18 @@ import "../../../../lib/extension/String"
 import {CalendarEvent} from "../../../../services/Agenda";
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
+interface EventListProps {
+    title?: Accessor<string>,
+    events: Accessor<CalendarEvent[]>
+    predicate?: (eventList: CalendarEvent[]) => boolean,
+}
+
 export function EventList(
     {
         title = new Accessor<string>(() => "Today"),
         events,
         predicate = (eventList) => eventList.length > 0
-    }: {
-        title?: Accessor<string>,
-        events: Accessor<CalendarEvent[]>
-        predicate?: (eventList: CalendarEvent[]) => boolean,
-    }
+    }: EventListProps
 ) {
 
     return (

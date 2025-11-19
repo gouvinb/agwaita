@@ -2,9 +2,11 @@ import {createState} from "ags"
 import PowerProfiles from "gi://AstalPowerProfiles"
 import {Gtk} from "ags/gtk4";
 
-export default function PowerModeIcon() {
-    const powerprofiles = PowerProfiles.get_default()
+interface PowerModeIconProps {
+    powerProfiles: PowerProfiles.PowerProfiles
+}
 
+export default function PowerModeIcon({powerProfiles}: PowerModeIconProps) {
     const [icon, setIcon] = createState<string>("org.gnome.Settings-power-symbolic")
 
     function updateIcon(activeProfile: string) {
@@ -22,11 +24,11 @@ export default function PowerModeIcon() {
         }
     }
 
-    powerprofiles.connect("notify::active-profile", ({activeProfile}) => {
+    powerProfiles.connect("notify::active-profile", ({activeProfile}) => {
         updateIcon(activeProfile)
     })
 
-    updateIcon(powerprofiles.activeProfile)
+    updateIcon(powerProfiles.activeProfile)
 
     return (
         <image

@@ -6,13 +6,20 @@ import {Dimensions} from "../../../../lib/ui/Dimensions";
 import {Lifecycle} from "../../../../lib/Lifecyle";
 import {createState} from "ags";
 
+interface CalendarProps {
+    ref: (instance: Gtk.Calendar) => void,
+    parentLifecycle: Lifecycle,
+    markCalendar: (calendar: Gtk.Calendar) => void,
+    updateDaySelected: (calendar: Gtk.Calendar) => void,
+}
+
 export function Calendar(
-    {ref, parentLifecycle, markCalendar, updateDaySelected}: {
-        ref: (instance: Gtk.Calendar) => void,
-        parentLifecycle: Lifecycle,
-        markCalendar: (calendar: Gtk.Calendar) => void,
-        updateDaySelected: (calendar: Gtk.Calendar) => void,
-    },
+    {
+        ref,
+        parentLifecycle,
+        markCalendar,
+        updateDaySelected
+    }: CalendarProps
 ) {
     const [rawDateTime, setRawDateTime] = createState<GLib.DateTime>(GLib.DateTime.new_now_local())
 

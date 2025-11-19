@@ -6,11 +6,16 @@ import {Dimensions} from "../../../../lib/ui/Dimensions";
 import {Log} from "../../../../lib/Logger";
 import {Lifecycle} from "../../../../lib/Lifecyle";
 
+interface AirplaneModeButtonQSProps {
+    parentLifeCycle?: Lifecycle | null,
+    minWidth: number,
+}
+
 export function AirplaneModeButtonQS(
-    {parentLifeCycle = null, minWidth}: {
-        parentLifeCycle?: Lifecycle | null,
-        minWidth: number,
-    },
+    {
+        parentLifeCycle = null,
+        minWidth,
+    }: AirplaneModeButtonQSProps,
 ) {
     const [mode, setMode] = createState<string>("up")
     const [icon, setIcon] = createState<string>("airplane-mode-disabled-symbolic");

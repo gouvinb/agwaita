@@ -4,9 +4,11 @@ import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4";
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
-export default function BatteryIcon() {
-    const battery = AstalBattery.get_default()
+interface BatteryIconProps {
+    battery: AstalBattery.Device
+}
 
+export default function BatteryIcon({battery}: BatteryIconProps) {
     const percentage: Accessor<number> = createBinding(battery, "percentage")
     const isCharging: Accessor<boolean> = createBinding(battery, "charging")
     const isPresent: Accessor<boolean> = createBinding(battery, "isPresent")

@@ -2,9 +2,10 @@ import {Gtk} from "ags/gtk4"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 import app from "ags/gtk4/app";
 
-export default function BluetoothButtonQS(
-    {minWidth}: { minWidth: number },
-) {
+interface BluetoothButtonQSProps {
+    minWidth: number,
+}
+export default function BluetoothButtonQS({minWidth}: BluetoothButtonQSProps) {
     return (
         <button
             css={`

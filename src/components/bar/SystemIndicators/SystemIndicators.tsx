@@ -23,7 +23,32 @@ import {Dimensions} from "../../../lib/ui/Dimensions";
 import {createLifecycle} from "../../../lib/Lifecyle";
 import {onCleanup} from "ags";
 
-export function SystemIndicators() {
+import AstalBattery from "gi://AstalBattery"
+import AstalBluetooth from "gi://AstalBluetooth"
+import AstalNotifd from "gi://AstalNotifd"
+import AstalWp from "gi://AstalWp"
+import PowerProfiles from "gi://AstalPowerProfiles"
+import Brightness from "../../../services/Brightness";
+
+interface SystemIndicatorsProps {
+    notifd: AstalNotifd.Notifd,
+    bluetooth: AstalBluetooth.Bluetooth,
+    wp: AstalWp.Wp,
+    battery: AstalBattery.Device,
+    powerprofiles: PowerProfiles.PowerProfiles,
+    brightness: Brightness,
+}
+
+export function SystemIndicators(
+    {
+        notifd,
+        bluetooth,
+        wp,
+        battery,
+        powerprofiles,
+        brightness
+    }: SystemIndicatorsProps
+) {
     let menuButton: Gtk.MenuButton
 
     let powerModeRevealer: Gtk.Revealer
@@ -48,19 +73,19 @@ export function SystemIndicators() {
         >
             <menubutton $={(self: Gtk.MenuButton) => (menuButton = self)}>
                 <box spacing={Dimensions.normalSpacing}>
-                    <BrightnessIcon/>
+                    <BrightnessIcon brightness={brightness}/>
 
-                    <AudioIcon/>
+                    <AudioIcon wp={wp}/>
 
-                    <BluetoothIcon/>
+                    <BluetoothIcon bluetooth={bluetooth}/>
 
                     <NetworkIcon/>
 
-                    <DoNotDisturbIcon/>
+                    <DoNotDisturbIcon notifd={notifd}/>
 
-                    <PowerModeIcon/>
+                    <PowerModeIcon powerProfiles={powerprofiles}/>
 
-                    <BatteryIcon/>
+                    <BatteryIcon battery={battery}/>
 
                     <AvatarIcon/>
                 </box>
@@ -84,7 +109,7 @@ export function SystemIndicators() {
                         >
                             <centerbox halign={Gtk.Align.FILL} hexpand>
                                 <box $type="start" spacing={Dimensions.smallSpacing}>
-                                    <BatteryIcon/>
+                                    <BatteryIcon battery={battery}/>
                                 </box>
                                 <box $type="end" spacing={Dimensions.smallSpacing}>
                                     <button
@@ -123,7 +148,7 @@ export function SystemIndicators() {
                                     css={`
                                         padding-left: ${Dimensions.normalSpacing}px;
                                     `}>
-                                    <AudioQS/>
+                                    <AudioQS wp={wp}/>
                                 </box>
                             </box>
                             <box spacing={Dimensions.smallSpacing} hexpand>
@@ -131,7 +156,7 @@ export function SystemIndicators() {
                                     css={`
                                         padding-left: ${Dimensions.normalSpacing}px;
                                     `}>
-                                    <BrightnessQS/>
+                                    <BrightnessQS brightness={brightness}/>
                                 </box>
                             </box>
                             <box
@@ -149,6 +174,7 @@ export function SystemIndicators() {
                                         minWidth={halfQuickSettingsWidth}
                                     />
                                     <PowerModeButtonQS
+                                        powerProfiles={powerprofiles}
                                         revealer={() => powerModeRevealer}
                                         onReveal={() => {
                                             accentColorRevealer.revealChild = false
@@ -195,7 +221,10 @@ export function SystemIndicators() {
                                     `}
                                     spacing={Dimensions.normalSpacing}
                                 >
-                                    <DoNotDisturbButtonQS minWidth={halfQuickSettingsWidth}/>
+                                    <DoNotDisturbButtonQS
+                                        notifd={notifd}
+                                        minWidth={halfQuickSettingsWidth}
+                                    />
                                     <BluetoothButtonQS minWidth={halfQuickSettingsWidth}/>
                                 </box>
                             </box>

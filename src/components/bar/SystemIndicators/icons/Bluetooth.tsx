@@ -3,9 +3,11 @@ import AstalBluetooth from "gi://AstalBluetooth"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4";
 
-export default function BluetoothIcon() {
-    const bluetooth = AstalBluetooth.get_default()!
+interface BluetoothProps {
+    bluetooth: AstalBluetooth.Bluetooth
+}
 
+export default function BluetoothIcon({bluetooth}: BluetoothProps) {
     const devices: Accessor<AstalBluetooth.Device[]> = createBinding(bluetooth, "devices")
     const isPowered = createBinding(bluetooth, "isPowered") as Accessor<boolean>
     const isConnected: Accessor<boolean> = createBinding(bluetooth, "isConnected") as Accessor<boolean>

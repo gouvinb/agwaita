@@ -3,9 +3,11 @@ import {Gtk} from "ags/gtk4"
 import AstalNotifd from "gi://AstalNotifd"
 import {Accessor} from "gnim"
 
-export default function DoNotDisturbIcon() {
-    const notifd = AstalNotifd.get_default()
+interface DotNotDisturbIconProps {
+    notifd: AstalNotifd.Notifd
+}
 
+export default function DoNotDisturbIcon({notifd}: DotNotDisturbIconProps) {
     const dontDisturb: Accessor<boolean> = createBinding(notifd, "dontDisturb")
     const [iconName, setIconName] = createState<string>("org.gnome.Settings-notifications-symbolic")
 

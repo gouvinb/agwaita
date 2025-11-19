@@ -6,11 +6,16 @@ import {Dimensions} from "../../../../../lib/ui/Dimensions";
 import {Log} from "../../../../../lib/Logger";
 import {Lifecycle} from "../../../../../lib/Lifecyle";
 
+interface AccentColorRevealerQSProps {
+    ref?: (element: Gtk.Revealer) => void,
+    parentLifecycle?: Lifecycle | null,
+}
+
 export default function AccentColorRevealerQS(
-    {ref, parentLifecycle = null}: {
-        ref?: (element: Gtk.Revealer) => void,
-        parentLifecycle?: Lifecycle | null,
-    }
+    {
+        ref,
+        parentLifecycle = null,
+    }: AccentColorRevealerQSProps
 ) {
 
     const [accentColor, setAccentColor] = createState<string>("blue");

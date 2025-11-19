@@ -8,8 +8,7 @@ import AstalBluetooth from "gi://AstalBluetooth"
 import {Log} from "../lib/Logger";
 import {interval, Timer} from "ags/time";
 
-export default function BluetoothManager() {
-    const bluetooth = AstalBluetooth.get_default();
+export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
     const [currentAdapter, setCurrentAdapter] = createState(bluetooth.get_adapter());
 
     const [powerState, setPowerState] = createState(currentAdapter.get()?.powered ?? false);

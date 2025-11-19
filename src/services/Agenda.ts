@@ -92,25 +92,25 @@ export default class Agenda extends GObject.Object {
             this.#updateClients()
         }
 
-        if (this.#timerEventsState == null) {
-            this.#timerEventsState = interval(5_000, () => {
-                this.#setEventsState(this.#listCalendarEvents())
-            })
-        }
-
         if (this.#timerSourceRegistry == null) {
             this.#timerSourceRegistry = interval(5_000, () => {
                 this.#updateSourceRegistry()
             })
         }
         if (this.#timerSources == null) {
-            this.#timerSources = interval((this.#sources.length + 1) * 1000, () => {
+            this.#timerSources = interval(5_000, () => {
                 this.#updateSources()
             })
         }
         if (this.#timerClients == null) {
-            this.#timerClients = interval((this.#clients.length + 1) * 1000, () => {
+            this.#timerClients = interval(5_000, () => {
                 this.#updateClients()
+            })
+        }
+
+        if (this.#timerEventsState == null) {
+            this.#timerEventsState = interval(5_000, () => {
+                this.#setEventsState(this.#listCalendarEvents())
             })
         }
     }

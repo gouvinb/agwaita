@@ -1,13 +1,22 @@
 import {Gtk} from "ags/gtk4"
 import PowerModeIcon from "../icons/PowerMode"
+import PowerProfiles from "gi://AstalPowerProfiles"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
+interface PowerModeButtonQSProps {
+    powerProfiles: PowerProfiles.PowerProfiles
+    revealer: () => Gtk.Revealer,
+    onReveal: () => void,
+    minWidth: number,
+}
+
 export default function PowerModeButtonQS(
-    {revealer, onReveal, minWidth}: {
-        revealer: () => Gtk.Revealer,
-        onReveal: () => void,
-        minWidth: number,
-    },
+    {
+        powerProfiles,
+        revealer,
+        onReveal,
+        minWidth,
+    }: PowerModeButtonQSProps,
 ) {
     return (
         <button
@@ -25,7 +34,7 @@ export default function PowerModeButtonQS(
             }}
         >
             <box spacing={Dimensions.normalSpacing}>
-                <PowerModeIcon/>
+                <PowerModeIcon powerProfiles={powerProfiles}/>
                 <label label={"Power mode"}/>
                 <box hexpand/>
                 <image

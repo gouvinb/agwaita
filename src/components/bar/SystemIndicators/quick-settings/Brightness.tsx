@@ -4,9 +4,11 @@ import GLib from "gi://GLib?version=2.0"
 import {Astal} from "ags/gtk4"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
-export default function BrightnessQS() {
-    const brightnessInstance = Brightness.get_default()
+interface BrightnessQSProps {
+    brightness: Brightness
+}
 
+export default function BrightnessQS({brightness}: BrightnessQSProps) {
     let slider: Astal.Slider
 
     let isSliding = false
@@ -22,26 +24,29 @@ export default function BrightnessQS() {
         }, 167);
     };
 
-    brightnessInstance.connect("notify::screen", () => {
+    brightness.connect("notify::screen", () => {
         if (!isSliding) {
-            slider.value = brightnessInstance.screen;
+            slider.value = brightness.screen;
         }
     });
 
     return (
         <box spacing={Dimensions.smallSpacing}>
-            <BrightnessIcon onClicked={() => {
-            }}/>
+            <BrightnessIcon
+                brightness={brightness}
+                onClicked={() => {
+                }}
+            />
             <slider
                 $={(self) => slider = self}
                 hexpand
-                value={brightnessInstance.screen}
+                value={brightness.screen}
                 min={0}
                 max={1}
                 step={0.1}
                 onChangeValue={({value}) => {
                     setSliding();
-                    brightnessInstance.set({screen: value});
+                    brightness.set({screen: value});
                 }}
             />
         </box>

@@ -3,8 +3,11 @@ import {Gtk} from "ags/gtk4"
 import Tray from "gi://AstalTray"
 import {Dimensions} from "../../lib/ui/Dimensions";
 
-export default function SysTray() {
-    const tray = Tray.get_default()
+interface SysTrayProps {
+    tray: Tray.Tray
+}
+
+export default function SysTray({tray}: SysTrayProps) {
     const items = createBinding(tray, "items")
 
     const init = (btn: Gtk.MenuButton, item: Tray.TrayItem) => {

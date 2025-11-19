@@ -1,12 +1,21 @@
-import Bar from "./src/app/Bar"
+import {Bar} from "./src/app/Bar"
 import app from "ags/gtk4/app"
 import style from "./style.scss"
 import DesktopScriptsLib from "./src/lib/ExternalCommand"
 import {GlobalRequestHandler} from "./src/requesthandler/GlobalRequestHandler";
-import {createBinding, For, This} from "ags"
-import Notifications from "./src/app/Notifications";
+import {createBinding, For, onCleanup} from "ags"
+import {Notifications} from "./src/app/Notifications";
 import {customExecutableDependencies, dependencies} from "./src/lib/Dependency";
 import BluetoothManager from "./src/app/BluetoothManager";
+
+import AstalBattery from "gi://AstalBattery"
+import AstalBluetooth from "gi://AstalBluetooth"
+import AstalNotifd from "gi://AstalNotifd"
+import AstalWp from "gi://AstalWp"
+import PowerProfiles from "gi://AstalPowerProfiles"
+import Tray from "gi://AstalTray"
+import Agenda from "./src/services/Agenda";
+import Brightness from "./src/services/Brightness";
 
 app.start({
     css: style,
@@ -37,18 +46,37 @@ app.start({
 
         const monitors = createBinding(app, "monitors")
 
-        BluetoothManager()
+        const notifd = AstalNotifd.get_default()
+        const bluetooth = AstalBluetooth.get_default()
+        const wp = AstalWp.get_default()
+        const battery = AstalBattery.get_default()
+        const powerprofiles = PowerProfiles.get_default()
+        const tray = Tray.get_default()
 
-        Notifications()
+        const agenda = Agenda.get_with_timer_initialized()
+        const brightness = Brightness.get_default()
 
-        return (
-            <For each={monitors}>
-                {(monitor) => (
-                    <This this={app}>
-                        <Bar gdkmonitor={monitor}/>
-                    </This>
-                )}
-            </For>
-        )
+        BluetoothManager(bluetooth)
+
+        Notifications(notifd)
+
+        onCleanup(() => {
+            agenda.stopAllTimer()
+        })
+
+        return For({
+            each: monitors,
+            children: (gdkmonitor) => Bar({
+                gdkmonitor,
+                notifd,
+                bluetooth,
+                wp,
+                battery,
+                powerprofiles,
+                tray,
+                agenda,
+                brightness,
+            }),
+        })
     },
 })

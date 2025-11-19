@@ -3,28 +3,22 @@ import app from "ags/gtk4/app"
 import {Accessor, createBinding, createComputed, createState, For, onCleanup} from "ags"
 import Notification from "../components/notifications/Notification"
 import AstalNotifd from "gi://AstalNotifd"
-import {Dimensions} from "../lib/ui/Dimensions";
+import {Dimensions} from "../lib/ui/Dimensions"
 
 
-export const [notifications, setNotifications] = createState(
-    new Array<AstalNotifd.Notification>(),
-)
+export function Notifications(notifd: AstalNotifd.Notifd) {
+    const [notificationsOverlay, setNotificationsOverlay] = createState(
+        new Array<AstalNotifd.Notification>(),
+    )
 
-export const [notificationsOverlay, setNotificationsOverlay] = createState(
-    new Array<AstalNotifd.Notification>(),
-)
-
-export default function Notifications() {
-    const notifd = AstalNotifd.get_default()
-
-    setNotifications(notifd.get_notifications())
     setNotificationsOverlay(notifd.get_notifications())
 
     const doNotDisturb: Accessor<boolean> = createBinding(notifd, "dontDisturb")
 
     const notifiedHandler = notifd.connect("notified", (_, id, replaced) => {
+        const notifications = notifd.get_notifications()
         const newNotifList = (value: AstalNotifd.Notification[]) => {
-            if (replaced && notifications.get().some((n) => n.id === id)) {
+            if (replaced && notifications.some((n) => n.id === id)) {
                 return value
                     .map((n) => n.id === id ? notification : n)
                     .filter((n) => n != null)
@@ -36,14 +30,12 @@ export default function Notifications() {
 
         const notification = notifd.get_notification(id)
 
-        setNotifications(newNotifList)
         setNotificationsOverlay(newNotifList)
     })
 
     const resolvedHandler = notifd.connect("resolved", (_, id) => {
         const notificationsResolved = (value: AstalNotifd.Notification[]) => value.filter((n) => n.id !== id);
 
-        setNotifications(notificationsResolved)
         setNotificationsOverlay(notificationsResolved)
     })
 
@@ -56,7 +48,6 @@ export default function Notifications() {
         notifd.disconnect(resolvedHandler)
         win.destroy()
     })
-
     return (
         <window
             $={(self) => win = self}
@@ -79,8 +70,8 @@ export default function Notifications() {
                     orientation={Gtk.Orientation.VERTICAL}
                     spacing={Dimensions.smallSpacing}
                 >
-                    <For each={notificationsOverlay}>
-                        {(notification) => <Notification
+                    <For each={notificationsOverlay.as((n) => n.slice(0, 15))}>
+                        {(notification: AstalNotifd.Notification) => <Notification
                             isOverlay
                             init={
                                 (n) => {
@@ -94,7 +85,8 @@ export default function Notifications() {
                                                 return value.filter((notif) => notif.id !== n.id)
                                             })
                                         },
-                                        timeout_duration)
+                                        timeout_duration
+                                    )
 
                                     return () => {
                                         if (timeoutId) {

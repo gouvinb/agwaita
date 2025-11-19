@@ -2,8 +2,18 @@ import {Gtk} from "ags/gtk4"
 import AccentColorIcon from "../icons/AccentColor"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
+interface AccentColorButtonQSProps {
+    revealer: () => Gtk.Revealer,
+    onReveal: () => void,
+    minWidth: number,
+}
+
 export default function AccentColorButtonQS(
-    {revealer, onReveal, minWidth}: { revealer: () => Gtk.Revealer, onReveal: () => void, minWidth: number },
+    {
+        revealer,
+        onReveal,
+        minWidth,
+    }: AccentColorButtonQSProps
 ) {
 
     return (

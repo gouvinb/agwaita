@@ -8,7 +8,40 @@ import {SystemIndicators} from "../components/bar/SystemIndicators/SystemIndicat
 import Workspaces from "../components/bar/Workspaces";
 import {Dimensions} from "../lib/ui/Dimensions";
 
-export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
+import AstalBattery from "gi://AstalBattery"
+import AstalBluetooth from "gi://AstalBluetooth"
+import AstalNotifd from "gi://AstalNotifd"
+import AstalWp from "gi://AstalWp"
+import PowerProfiles from "gi://AstalPowerProfiles"
+import Tray from "gi://AstalTray"
+import Agenda from "../services/Agenda";
+import Brightness from "../services/Brightness";
+
+interface BarProps {
+    gdkmonitor: Gdk.Monitor,
+    notifd: AstalNotifd.Notifd,
+    bluetooth: AstalBluetooth.Bluetooth,
+    wp: AstalWp.Wp,
+    battery: AstalBattery.Device,
+    powerprofiles: PowerProfiles.PowerProfiles,
+    tray: Tray.Tray,
+    agenda: Agenda,
+    brightness: Brightness,
+}
+
+export function Bar(
+    {
+        gdkmonitor,
+        notifd,
+        bluetooth,
+        wp,
+        battery,
+        powerprofiles,
+        tray,
+        agenda,
+        brightness,
+    }: BarProps
+) {
     const {TOP, LEFT, RIGHT} = Astal.WindowAnchor
 
     let win: Astal.Window
@@ -47,7 +80,10 @@ export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
                         $type="center"
                         spacing={Dimensions.smallSpacing}
                     >
-                        <Clock popoverRequestHeight={Dimensions.notificationCenterHeight}/>
+                        <Clock
+                            agenda={agenda}
+                            notifd={notifd}
+                            popoverRequestHeight={Dimensions.notificationCenterHeight}/>
                     </box>
 
                     <box
@@ -55,8 +91,15 @@ export default function Bar({gdkmonitor}: { gdkmonitor: Gdk.Monitor }) {
                         spacing={Dimensions.smallSpacing}
                     >
                         <box><SystemdUnitFailed/></box>
-                        <box><SysTray/></box>
-                        <box><SystemIndicators/></box>
+                        <box><SysTray tray={tray}/></box>
+                        <box><SystemIndicators
+                            notifd={notifd}
+                            bluetooth={bluetooth}
+                            wp={wp}
+                            battery={battery}
+                            powerprofiles={powerprofiles}
+                            brightness={brightness}
+                        /></box>
                     </box>
 
                 </centerbox>

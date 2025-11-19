@@ -4,10 +4,12 @@ import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 
-export default function AudioIcon(
-    {onClicked}: { onClicked?: () => void }
-) {
-    const {defaultSpeaker: speaker} = AstalWp.get_default()!
+interface AudioIconProps {
+    onClicked?: () => void, wp: AstalWp.Wp
+}
+
+export default function AudioIcon({onClicked, wp}: AudioIconProps) {
+    const {defaultSpeaker: speaker} = wp
 
     const defaultSpeakerVolume: Accessor<number> = createBinding(speaker, "volume")
     const defaultSpeakerIsMuted: Accessor<boolean> = createBinding(speaker, "mute")

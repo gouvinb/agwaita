@@ -14,8 +14,14 @@ interface NotificationProps {
     init: ((notification: AstalNotifd.Notification) => void),
 }
 
-export default function Notification({notification: n, isOverlay, init}: NotificationProps) {
-    const cssClasses = getCssClasses(n, isOverlay)
+export default function Notification(
+    {
+        notification,
+        isOverlay,
+        init
+    }: NotificationProps
+) {
+    const cssClasses = getCssClasses(notification, isOverlay)
 
 
     function isIcon(icon?: string | null) {
@@ -72,7 +78,7 @@ export default function Notification({notification: n, isOverlay, init}: Notific
                     padding: ${Dimensions.smallSpacing}px;
                 `}
                 spacing={Dimensions.smallestSpacing}
-                $={() => init(n)}
+                $={() => init(notification)}
                 widthRequest={Dimensions.notificationWidth}
                 orientation={Gtk.Orientation.VERTICAL}
             >
@@ -82,10 +88,10 @@ export default function Notification({notification: n, isOverlay, init}: Notific
                     `}
                     spacing={Dimensions.smallSpacing}
                 >
-                    {(n.appIcon || isIcon(n.desktopEntry)) && (
+                    {(notification.appIcon || isIcon(notification.desktopEntry)) && (
                         <image
                             marginEnd={Dimensions.semiBigSpacing}
-                            iconName={n.appIcon || n.desktopEntry || "application-x-executable"}
+                            iconName={notification.appIcon || notification.desktopEntry || "application-x-executable"}
                             iconSize={Gtk.IconSize.NORMAL}
                         />
                     )}
@@ -96,7 +102,7 @@ export default function Notification({notification: n, isOverlay, init}: Notific
                         halign={Gtk.Align.START}
                         valign={Gtk.Align.FILL}
                         ellipsize={Pango.EllipsizeMode.END}
-                        label={n.appName || "Unknown"}
+                        label={notification.appName || "Unknown"}
                     />
                     <label
                         css={`
@@ -105,11 +111,11 @@ export default function Notification({notification: n, isOverlay, init}: Notific
                         hexpand
                         halign={Gtk.Align.END}
                         valign={Gtk.Align.FILL}
-                        label={time(n.time)}
+                        label={time(notification.time)}
                     />
                     <button
                         marginStart={Dimensions.semiBigSpacing}
-                        onClicked={() => n.dismiss()}
+                        onClicked={() => notification.dismiss()}
                         iconName="window-close-symbolic"
                     />
                 </box>
@@ -121,18 +127,18 @@ export default function Notification({notification: n, isOverlay, init}: Notific
                     spacing={Dimensions.semiBigSpacing}
                 >
                     {
-                        (n.image && isIcon(n.image) && (
+                        (notification.image && isIcon(notification.image) && (
                             <image
-                                iconName={n.image}
+                                iconName={notification.image}
                                 halign={Gtk.Align.CENTER}
                                 valign={Gtk.Align.START}
                                 iconSize={Gtk.IconSize.LARGE}
                                 marginTop={Dimensions.normalSpacing}
 
                             />
-                        )) || (n.image && fileExists(n.image) && (
+                        )) || (notification.image && fileExists(notification.image) && (
                             <image
-                                file={n.image}
+                                file={notification.image}
                                 halign={Gtk.Align.CENTER}
                                 valign={Gtk.Align.START}
                                 iconSize={Gtk.IconSize.LARGE}
@@ -150,32 +156,35 @@ export default function Notification({notification: n, isOverlay, init}: Notific
                                 font-weight: bold;
                             `}
                             halign={Gtk.Align.START}
-                            label={n.summary}
+                            label={notification.summary}
                             ellipsize={Pango.EllipsizeMode.END}
                         />
-                        {n.body && (<label
+                        {notification.body && (<label
                                 css={`
                                     font-size: small;
                                 `}
                                 halign={Gtk.Align.START}
                                 wrap
                                 useMarkup
-                                label={n.body}
+                                label={notification.body
+                                    .replace(/&/g, "&amp;")
+                                    .replace("<br/>", "\n")
+                                }
                             />
                         )}
                     </box>
                 </box>
-                {n.actions.length > 0 && (
+                {notification.actions.length > 0 && (
                     <box
                         css={`
                             padding: ${Dimensions.smallSpacing}px;
                         `}
                         spacing={Dimensions.smallSpacing}
                     >
-                        {n.actions.map(({label, id}) => (
+                        {notification.actions.map(({label, id}) => (
                             <button
                                 hexpand
-                                onClicked={() => n.invoke(id)}
+                                onClicked={() => notification.invoke(id)}
                                 label={label} halign={Gtk.Align.CENTER}
                             />
                         ))}

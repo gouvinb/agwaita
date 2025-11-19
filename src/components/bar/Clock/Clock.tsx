@@ -1,31 +1,83 @@
-import {Accessor, For, onCleanup, With} from "ags"
+import {Accessor, createState, For, onCleanup, With} from "ags"
 import {Gtk} from "ags/gtk4"
 import {createPoll} from "ags/time"
 import GLib from "gi://GLib"
 import Adw from "gi://Adw"
-import {notifications, setNotifications} from "../../../app/Notifications";
+import AstalNotifd from "gi://AstalNotifd"
 import Notification from "../../notifications/Notification";
 import {DataTimePopover} from "./DataTimePopover/DateTimePopover";
 import {Dimensions} from "../../../lib/ui/Dimensions";
 import {createLifecycle} from "../../../lib/Lifecyle";
+import "../../../lib/extension/String"
+import Agenda from "../../../services/Agenda";
+
+interface ClockProps {
+    notifd: AstalNotifd.Notifd,
+    agenda: Agenda,
+    format?: string,
+    popoverRequestHeight: number,
+}
 
 export function Clock(
     {
+        notifd,
+        agenda,
         format = "%a %d %b %Y %H:%M:%S",
-        popoverRequestHeight
-    }: {
-        format?: string,
-        popoverRequestHeight: number,
-    }
+        popoverRequestHeight,
+    }: ClockProps
 ) {
     const rawDateTime: Accessor<GLib.DateTime> = createPoll(
         GLib.DateTime.new_now_local(),
         1000,
         () => GLib.DateTime.new_now_local(),
     )
-    const popoverLifecycle = createLifecycle()
 
     const dateTime = rawDateTime.as((data) => data.format(format)!.capitalize())
+
+    const [notifications, setNotifications] = createState(
+        new Array<AstalNotifd.Notification>(),
+    )
+
+    setNotifications(notifd.get_notifications())
+
+    let notifiedHandler: number | null
+    let resolvedHandler: number | null
+
+    const popoverLifecycle = createLifecycle()
+    popoverLifecycle.onStart(() => {
+        notifiedHandler = notifd.connect("notified", (_, id, replaced) => {
+            const notifications = notifd.get_notifications()
+            const newNotifList = (value: AstalNotifd.Notification[]) => {
+                if (replaced && notifications.some((n) => n.id === id)) {
+                    return value
+                        .map((n) => n.id === id ? notification : n)
+                        .filter((n) => n != null)
+                } else {
+                    return [notification, ...value]
+                        .filter((n) => n != null)
+                }
+            };
+
+            const notification = notifd.get_notification(id)
+
+            setNotifications(newNotifList)
+        })
+        resolvedHandler = notifd.connect("resolved", (_, id) => {
+            const notificationsResolved = (value: AstalNotifd.Notification[]) => value.filter((n) => n.id !== id);
+
+            setNotifications(notificationsResolved)
+        })
+    })
+    popoverLifecycle.onStop(() => {
+        if (notifiedHandler) {
+            notifd.disconnect(notifiedHandler)
+            notifiedHandler = null
+        }
+        if (resolvedHandler) {
+            notifd.disconnect(resolvedHandler)
+            resolvedHandler = null
+        }
+    })
 
     onCleanup(() => {
         popoverLifecycle.dispose()
@@ -39,6 +91,7 @@ export function Clock(
                 css_classes={["shared-popover"]}
                 heightRequest={popoverRequestHeight}
                 onShow={() => {
+                    setNotifications(notifd.get_notifications())
                     popoverLifecycle.start()
                 }}
                 onClosed={() => {
@@ -63,8 +116,8 @@ export function Clock(
                                     orientation={Gtk.Orientation.VERTICAL}
                                     spacing={Dimensions.smallSpacing}
                                 >
-                                    <For each={notifications}>
-                                        {(notification) => <Notification
+                                    <For each={notifications.as((n) => n.slice(0, 5))}>
+                                        {(notification: AstalNotifd.Notification) => <Notification
                                             isOverlay={false}
                                             init={
                                                 (n) => {
@@ -136,6 +189,7 @@ export function Clock(
                             maximumSize={Dimensions.notificationWidth + 24}
                         >
                             <DataTimePopover
+                                agenda={agenda}
                                 parentLifecycle={popoverLifecycle}
                                 popoverRequestHeight={popoverRequestHeight}
                             />

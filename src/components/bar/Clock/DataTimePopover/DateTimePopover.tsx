@@ -9,14 +9,19 @@ import {DateTimeExt} from "../../../../lib/extension/GLibDateTime";
 import {Dimensions} from "../../../../lib/ui/Dimensions";
 import {Lifecycle} from "../../../../lib/Lifecyle";
 
-export function DataTimePopover(
-    {parentLifecycle, popoverRequestHeight}: {
-        parentLifecycle: Lifecycle,
-        popoverRequestHeight: number,
-    },
-) {
-    const agenda = Agenda.get_default()
+interface DateTimePopoverProps {
+    agenda: Agenda,
+    parentLifecycle: Lifecycle,
+    popoverRequestHeight: number,
+}
 
+export function DataTimePopover(
+    {
+        agenda,
+        parentLifecycle,
+        popoverRequestHeight,
+    }: DateTimePopoverProps,
+) {
     const [rawDateTime, setRawDateTime] = createState(GLib.DateTime.new_now_local())
 
     let rawDateTimeTimer: Timer | null = null
@@ -24,27 +29,18 @@ export function DataTimePopover(
     const [calendarSelectedDate, setCalendarSelectedDate] = createState<GLib.DateTime>(rawDateTime.get())
     const calendarSelectedDateFormatted = calendarSelectedDate.as((date) => date.format("%A %d %b %Y")!.capitalize())
 
-    const eventsAccessor = {
-        get: () => agenda.events,
-        subscribe: (cb: (e: CalendarEvent[]) => void) => {
-            const id = agenda.connect("notify::events", () => cb(agenda.events))
-            return () => agenda.disconnect(id)
-        }
-    }
+    const [eventsAccessor, setEvents] = createState<CalendarEvent[]>(agenda.events)
 
-    const todayEventsAccessor: Accessor<CalendarEvent[]> = new Accessor<CalendarEvent[]>(
-        () => agenda.events.filter(
-            (event) => event.start.format("%Y%m%d")! === (rawDateTime?.get().format("%Y%m%d") ?? "")
-        ),
-        (cb: (e: CalendarEvent[]) => void) => {
-            const id = agenda.connect("notify::events", () => cb(todayEventsAccessor.get()))
-            return () => agenda.disconnect(id)
-        }
-    )
+    const todayEventsAccessor: Accessor<CalendarEvent[]> = eventsAccessor.as((events) =>
+        events.filter((event) => event.start.format("%Y%m%d")! === (rawDateTime?.get().format("%Y%m%d") ?? "")
+        ))
+
 
     const selectedDayEventsAccessor: Accessor<CalendarEvent[]> = calendarSelectedDate.as((date: GLib.DateTime) =>
-        agenda.events.filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
+        eventsAccessor.get().filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
     )
+
+    let eventNotifier: number
 
     let calendar: Gtk.Calendar
 
@@ -72,12 +68,13 @@ export function DataTimePopover(
             1000,
             () => setRawDateTime(GLib.DateTime.new_now_local()),
         )
-        agenda.initAllTimer()
+        eventNotifier = agenda.connect("notify::events", () => setEvents(agenda.events))
     })
     parentLifecycle.onStop(() => {
         rawDateTimeTimer?.cancel()
         rawDateTimeTimer = null
-        agenda.stopAllTimer()
+
+        agenda.disconnect(eventNotifier)
     })
 
     onCleanup(() => {
