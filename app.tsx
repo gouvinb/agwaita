@@ -53,7 +53,8 @@ app.start({
         const powerprofiles = PowerProfiles.get_default()
         const tray = Tray.get_default()
 
-        const agenda = Agenda.get_with_timer_initialized()
+        const agenda = Agenda.get_with_signals_initialized()
+
         const brightness = Brightness.get_default()
 
         BluetoothManager(bluetooth)
@@ -61,7 +62,7 @@ app.start({
         Notifications(notifd)
 
         onCleanup(() => {
-            agenda.stopAllTimer()
+            agenda.stopAllSignals()
         })
 
         return For({

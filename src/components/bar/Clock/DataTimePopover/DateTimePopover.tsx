@@ -3,11 +3,11 @@ import {Gtk} from "ags/gtk4"
 import {interval, Timer} from "ags/time"
 import GLib from "gi://GLib"
 import Agenda, {CalendarEvent} from "../../../../services/Agenda"
-import {Calendar} from "./Calendar";
-import {EventList} from "./EventList";
-import {DateTimeExt} from "../../../../lib/extension/GLibDateTime";
-import {Dimensions} from "../../../../lib/ui/Dimensions";
-import {Lifecycle} from "../../../../lib/Lifecyle";
+import {Calendar} from "./Calendar"
+import {EventList} from "./EventList"
+import {DateTimeExt} from "../../../../lib/extension/GLibDateTime"
+import {Dimensions} from "../../../../lib/ui/Dimensions"
+import {Lifecycle} from "../../../../lib/Lifecyle"
 
 interface DateTimePopoverProps {
     agenda: Agenda,
@@ -29,18 +29,18 @@ export function DataTimePopover(
     const [calendarSelectedDate, setCalendarSelectedDate] = createState<GLib.DateTime>(rawDateTime.get())
     const calendarSelectedDateFormatted = calendarSelectedDate.as((date) => date.format("%A %d %b %Y")!.capitalize())
 
-    const [eventsAccessor, setEvents] = createState<CalendarEvent[]>(agenda.events)
+    const [eventsAccessor, setEvents] = createState<CalendarEvent[]>([])
 
     const todayEventsAccessor: Accessor<CalendarEvent[]> = eventsAccessor.as((events) =>
-        events.filter((event) => event.start.format("%Y%m%d")! === (rawDateTime?.get().format("%Y%m%d") ?? "")
-        ))
+        events.filter((event) => event.start.format("%Y%m%d")! === (rawDateTime?.get().format("%Y%m%d") ?? ""))
+    )
 
 
     const selectedDayEventsAccessor: Accessor<CalendarEvent[]> = calendarSelectedDate.as((date: GLib.DateTime) =>
         eventsAccessor.get().filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
     )
 
-    let eventNotifier: number
+    let eventNotifier: number | null = agenda.connect("notify::events", () => setEvents(agenda.events))
 
     let calendar: Gtk.Calendar
 
@@ -68,13 +68,18 @@ export function DataTimePopover(
             1000,
             () => setRawDateTime(GLib.DateTime.new_now_local()),
         )
-        eventNotifier = agenda.connect("notify::events", () => setEvents(agenda.events))
+        if (eventNotifier != null) {
+            eventNotifier = agenda.connect("notify::events", () => setEvents(agenda.events))
+        }
     })
     parentLifecycle.onStop(() => {
         rawDateTimeTimer?.cancel()
         rawDateTimeTimer = null
 
-        agenda.disconnect(eventNotifier)
+        if (eventNotifier != null) {
+            agenda.disconnect(eventNotifier)
+        }
+        eventNotifier = null
     })
 
     onCleanup(() => {
