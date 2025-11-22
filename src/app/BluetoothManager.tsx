@@ -1,18 +1,18 @@
 import Adw from "gi://Adw"
 import app from "ags/gtk4/app"
 import {createState, For, onCleanup, With} from "ags"
-import {Gtk} from "ags/gtk4";
-import GObject from "gnim/gobject";
-import {Shapes} from "../lib/ui/Shapes";
+import {Gtk} from "ags/gtk4"
+import GObject from "gnim/gobject"
+import {Shapes} from "../lib/ui/Shapes"
 import AstalBluetooth from "gi://AstalBluetooth"
-import {Log} from "../lib/Logger";
-import {interval, Timer} from "ags/time";
+import {Log} from "../lib/Logger"
+import {interval, Timer} from "ags/time"
 
 export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
-    const [currentAdapter, setCurrentAdapter] = createState(bluetooth.get_adapter());
+    const [currentAdapter, setCurrentAdapter] = createState(bluetooth.get_adapter())
 
-    const [powerState, setPowerState] = createState(currentAdapter.get()?.powered ?? false);
-    const [discoverableState, setDiscoverableState] = createState(currentAdapter.get()?.discoverable ?? false);
+    const [powerState, setPowerState] = createState(currentAdapter.get()?.powered ?? false)
+    const [discoverableState, setDiscoverableState] = createState(currentAdapter.get()?.discoverable ?? false)
     const [discoverableTimeoutState, setDiscoverableTimeoutState] = createState(currentAdapter.get()?.discoverable_timeout ?? 0);
     const [adapterAliasState, setAliasState] = createState(currentAdapter.get()?.alias ?? "Unknown");
     const [devices, setDevices] = createState<AstalBluetooth.Device[]>([]);

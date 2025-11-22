@@ -1,6 +1,6 @@
 import {exec} from "ags/process"
 import GLib from "gi://GLib"
-import {Log} from "./Logger";
+import {Log} from "./Logger"
 
 /**
  * @returns true if all the `bins` are found

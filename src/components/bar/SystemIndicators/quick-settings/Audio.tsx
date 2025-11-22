@@ -3,7 +3,7 @@ import AstalWp from "gi://AstalWp"
 import GLib from "gi://GLib?version=2.0"
 import {Astal} from "ags/gtk4"
 import {shAsync} from "../../../../lib/ExternalCommand"
-import {Dimensions} from "../../../../lib/ui/Dimensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 interface AudioQsProps {
     wp: AstalWp.Wp
@@ -18,7 +18,7 @@ export default function AudioQS({wp}: AudioQsProps) {
     let slideTimeout: GLib.Source | null = null
 
     const setSliding = () => {
-        isSliding = true;
+        isSliding = true
         if (slideTimeout) {
             clearTimeout(slideTimeout);
         }

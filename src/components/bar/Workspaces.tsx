@@ -1,8 +1,8 @@
 import {Gdk, Gtk} from "ags/gtk4"
 import {createState, For} from "ags"
 import currentWM, {WM, Workspace} from "../../services/wm/WM"
-import {Log} from "../../lib/Logger";
-import {Dimensions} from "../../lib/ui/Dimensions";
+import {Log} from "../../lib/Logger"
+import {Dimensions} from "../../lib/ui/Dimensions"
 
 type WorkspaceUi = {
     index: number,

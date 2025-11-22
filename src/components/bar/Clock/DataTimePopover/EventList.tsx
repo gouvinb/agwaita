@@ -1,9 +1,9 @@
-import {Gtk} from "ags/gtk4";
-import {Accessor, For, With} from "ags";
+import {Gtk} from "ags/gtk4"
+import {Accessor, For, With} from "ags"
 import "../../../../lib/extension/GLibDateTime"
 import "../../../../lib/extension/String"
-import {CalendarEvent} from "../../../../services/Agenda";
-import {Dimensions} from "../../../../lib/ui/Dimensions";
+import {CalendarEvent} from "../../../../services/Agenda"
+import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 interface EventListProps {
     title?: Accessor<string>,

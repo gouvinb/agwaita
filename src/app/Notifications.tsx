@@ -26,7 +26,7 @@ export function Notifications(notifd: AstalNotifd.Notifd) {
                 return [notification, ...value]
                     .filter((n) => n != null)
             }
-        };
+        }
 
         const notification = notifd.get_notification(id)
 
@@ -34,7 +34,7 @@ export function Notifications(notifd: AstalNotifd.Notifd) {
     })
 
     const resolvedHandler = notifd.connect("resolved", (_, id) => {
-        const notificationsResolved = (value: AstalNotifd.Notification[]) => value.filter((n) => n.id !== id);
+        const notificationsResolved = (value: AstalNotifd.Notification[]) => value.filter((n) => n.id !== id)
 
         setNotificationsOverlay(notificationsResolved)
     })

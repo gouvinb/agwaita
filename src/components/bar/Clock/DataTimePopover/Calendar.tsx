@@ -1,10 +1,10 @@
-import {Gtk} from "ags/gtk4";
+import {Gtk} from "ags/gtk4"
 import {interval, Timer} from "ags/time"
 import GLib from "gi://GLib"
 import "../../../../lib/extension/String"
-import {Dimensions} from "../../../../lib/ui/Dimensions";
-import {Lifecycle} from "../../../../lib/Lifecyle";
-import {createState} from "ags";
+import {Dimensions} from "../../../../lib/ui/Dimensions"
+import {Lifecycle} from "../../../../lib/Lifecyle"
+import {createState} from "ags"
 
 interface CalendarProps {
     ref: (instance: Gtk.Calendar) => void,

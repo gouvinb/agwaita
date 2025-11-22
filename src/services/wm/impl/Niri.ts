@@ -3,7 +3,7 @@ import {WM, Workspace, WorkspaceEvent} from "../WM"
 import GObject, {getter, register} from "gnim/gobject"
 import GLib from "gi://GLib"
 import {Accessor} from "gnim"
-import {Log} from "../../../lib/Logger";
+import {Log} from "../../../lib/Logger"
 
 interface NiriRawWorkspace {
     id: number,

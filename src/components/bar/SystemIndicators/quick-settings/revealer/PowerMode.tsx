@@ -1,7 +1,7 @@
 import {Gtk} from "ags/gtk4"
 import PowerProfiles from "gi://AstalPowerProfiles"
 import {createBinding, With} from "ags"
-import {Dimensions} from "../../../../../lib/ui/Dimensions";
+import {Dimensions} from "../../../../../lib/ui/Dimensions"
 
 interface PowerModeRevealerQSProps {
     ref?: (element: Gtk.Revealer) => void,

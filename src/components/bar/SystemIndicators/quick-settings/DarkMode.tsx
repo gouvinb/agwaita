@@ -2,9 +2,9 @@ import {Gtk} from "ags/gtk4"
 import {interval, Timer} from "ags/time"
 import {createState} from "ags"
 import {shAsync} from "../../../../lib/ExternalCommand"
-import {Dimensions} from "../../../../lib/ui/Dimensions";
-import {Log} from "../../../../lib/Logger";
-import {Lifecycle} from "../../../../lib/Lifecyle";
+import {Dimensions} from "../../../../lib/ui/Dimensions"
+import {Log} from "../../../../lib/Logger"
+import {Lifecycle} from "../../../../lib/Lifecyle"
 
 export default function DarkModeButtonQS(
     {parentLifecycle = null, minWidth}: {

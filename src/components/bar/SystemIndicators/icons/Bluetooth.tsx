@@ -1,7 +1,7 @@
 import {createBinding, createState, With} from "ags"
 import AstalBluetooth from "gi://AstalBluetooth"
 import {Accessor} from "gnim"
-import {Gtk} from "ags/gtk4";
+import {Gtk} from "ags/gtk4"
 
 interface BluetoothProps {
     bluetooth: AstalBluetooth.Bluetooth

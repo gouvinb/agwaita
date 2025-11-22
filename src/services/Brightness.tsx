@@ -2,7 +2,7 @@ import {monitorFile, readFile, readFileAsync} from "ags/file"
 import GObject, {getter, register, setter} from "gnim/gobject"
 import GLib from "gi://GLib"
 import DesktopScriptLib, {bash} from "../lib/ExternalCommand"
-import {Log} from "../lib/Logger";
+import {Log} from "../lib/Logger"
 
 const screenDevice = bash(`ls -w1 /sys/class/backlight | head -1`)
 const screen = `/sys/class/backlight/${screenDevice}`
@@ -67,7 +67,7 @@ export default class Brightness extends GObject.Object {
             this.#screen = percent
             this.notify("screen")
         } catch (error) {
-            Log.e("Brightness service", `Cannot apply ${percent}%`, error);
+            Log.e("Brightness service", `Cannot apply ${percent}%`, error)
         }
     }
 }

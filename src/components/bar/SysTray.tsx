@@ -1,7 +1,7 @@
 import {createBinding, For, onCleanup} from "ags"
 import {Gtk} from "ags/gtk4"
 import Tray from "gi://AstalTray"
-import {Dimensions} from "../../lib/ui/Dimensions";
+import {Dimensions} from "../../lib/ui/Dimensions"
 
 interface SysTrayProps {
     tray: Tray.Tray

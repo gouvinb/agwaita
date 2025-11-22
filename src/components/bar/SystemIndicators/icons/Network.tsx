@@ -1,8 +1,8 @@
 import {createState} from "ags"
 import {interval} from "ags/time"
 import GLib from "gi://GLib"
-import {Gtk} from "ags/gtk4";
-import {Log} from "../../../../lib/Logger";
+import {Gtk} from "ags/gtk4"
+import {Log} from "../../../../lib/Logger"
 
 type NetworkState = {
     type: "wired" | "wifi" | "none"
@@ -17,8 +17,8 @@ export default function NetworkIcon() {
     function getNetworkState(): NetworkState {
         try {
             const [, stdout] = GLib.spawn_command_line_sync("ip -br link show up")
-            let output: string = "";
-            if (stdout) output = new TextDecoder().decode(stdout);
+            let output: string = ""
+            if (stdout) output = new TextDecoder().decode(stdout)
 
             const lines = output.trim().split("\n");
 

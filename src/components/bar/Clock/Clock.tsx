@@ -4,12 +4,12 @@ import {createPoll} from "ags/time"
 import GLib from "gi://GLib"
 import Adw from "gi://Adw"
 import AstalNotifd from "gi://AstalNotifd"
-import Notification from "../../notifications/Notification";
-import {DataTimePopover} from "./DataTimePopover/DateTimePopover";
-import {Dimensions} from "../../../lib/ui/Dimensions";
-import {createLifecycle} from "../../../lib/Lifecyle";
+import Notification from "../../notifications/Notification"
+import {DataTimePopover} from "./DataTimePopover/DateTimePopover"
+import {Dimensions} from "../../../lib/ui/Dimensions"
+import {createLifecycle} from "../../../lib/Lifecyle"
 import "../../../lib/extension/String"
-import Agenda from "../../../services/Agenda";
+import Agenda from "../../../services/Agenda"
 
 interface ClockProps {
     notifd: AstalNotifd.Notifd,
@@ -38,7 +38,10 @@ export function Clock(
         new Array<AstalNotifd.Notification>(),
     )
 
-    setNotifications(notifd.get_notifications())
+    setNotifications(
+        notifd.get_notifications()
+            .sort((a, b) => b.get_time() - a.get_time())
+    )
 
     let notifiedHandler: number | null
     let resolvedHandler: number | null
@@ -52,18 +55,24 @@ export function Clock(
                     return value
                         .map((n) => n.id === id ? notification : n)
                         .filter((n) => n != null)
+                        .sort((a, b) => b.get_time() - a.get_time())
                 } else {
                     return [notification, ...value]
                         .filter((n) => n != null)
+                        .sort((a, b) => b.get_time() - a.get_time())
                 }
-            };
+            }
 
             const notification = notifd.get_notification(id)
 
             setNotifications(newNotifList)
         })
         resolvedHandler = notifd.connect("resolved", (_, id) => {
-            const notificationsResolved = (value: AstalNotifd.Notification[]) => value.filter((n) => n.id !== id);
+            const notificationsResolved = (value: AstalNotifd.Notification[]) => {
+                return value
+                    .filter((n) => n.id !== id)
+                    .sort((a, b) => b.get_time() - a.get_time())
+            }
 
             setNotifications(notificationsResolved)
         })

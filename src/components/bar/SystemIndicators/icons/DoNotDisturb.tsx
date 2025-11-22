@@ -32,5 +32,5 @@ export default function DoNotDisturbIcon({notifd}: DotNotDisturbIconProps) {
             iconName={iconName}
             iconSize={Gtk.IconSize.NORMAL}
         />
-    );
+    )
 }

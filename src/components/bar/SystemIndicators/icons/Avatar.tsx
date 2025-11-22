@@ -1,8 +1,8 @@
 import GLib from "gi://GLib"
 import {Gtk} from "ags/gtk4"
 import {createState, With} from "ags"
-import {interval} from "ags/time";
-import {Dimensions} from "../../../../lib/ui/Dimensions";
+import {interval} from "ags/time"
+import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 export default function AvatarIcon() {
     const userName = GLib.get_user_name()

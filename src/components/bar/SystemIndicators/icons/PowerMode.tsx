@@ -1,6 +1,6 @@
 import {createState} from "ags"
 import PowerProfiles from "gi://AstalPowerProfiles"
-import {Gtk} from "ags/gtk4";
+import {Gtk} from "ags/gtk4"
 
 interface PowerModeIconProps {
     powerProfiles: PowerProfiles.PowerProfiles

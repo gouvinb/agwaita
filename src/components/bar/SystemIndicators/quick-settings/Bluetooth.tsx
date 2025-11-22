@@ -1,6 +1,6 @@
 import {Gtk} from "ags/gtk4"
-import {Dimensions} from "../../../../lib/ui/Dimensions";
-import app from "ags/gtk4/app";
+import {Dimensions} from "../../../../lib/ui/Dimensions"
+import app from "ags/gtk4/app"
 
 interface BluetoothButtonQSProps {
     minWidth: number,

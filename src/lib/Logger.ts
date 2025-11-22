@@ -8,10 +8,10 @@ const LogLevel = {
     WARNING: "W",
     INFO: "I",
     DEBUG: "D",
-} as const;
+} as const
 
-type LogLevelKey = keyof typeof LogLevel;
-type LogLevelValue = typeof LogLevel[LogLevelKey];
+type LogLevelKey = keyof typeof LogLevel
+type LogLevelValue = typeof LogLevel[LogLevelKey]
 
 export const Log = new class {
     c(tag: string, msg: string, err?: Error | unknown | null | undefined) {

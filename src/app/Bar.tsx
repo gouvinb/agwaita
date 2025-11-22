@@ -5,8 +5,8 @@ import {Clock} from "../components/bar/Clock/Clock"
 import SystemdUnitFailed from "../components/bar/SystemdUnitFailed"
 import SysTray from "../components/bar/SysTray"
 import {SystemIndicators} from "../components/bar/SystemIndicators/SystemIndicators"
-import Workspaces from "../components/bar/Workspaces";
-import {Dimensions} from "../lib/ui/Dimensions";
+import Workspaces from "../components/bar/Workspaces"
+import {Dimensions} from "../lib/ui/Dimensions"
 
 import AstalBattery from "gi://AstalBattery"
 import AstalBluetooth from "gi://AstalBluetooth"
@@ -14,7 +14,7 @@ import AstalNotifd from "gi://AstalNotifd"
 import AstalWp from "gi://AstalWp"
 import PowerProfiles from "gi://AstalPowerProfiles"
 import Tray from "gi://AstalTray"
-import Agenda from "../services/Agenda";
+import Agenda from "../services/Agenda"
 import Brightness from "../services/Brightness";
 
 interface BarProps {

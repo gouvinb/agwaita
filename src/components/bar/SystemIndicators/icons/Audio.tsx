@@ -2,7 +2,7 @@ import {createBinding, createState} from "ags"
 import AstalWp from "gi://AstalWp"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
-import {Dimensions} from "../../../../lib/ui/Dimensions";
+import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 interface AudioIconProps {
     onClicked?: () => void, wp: AstalWp.Wp

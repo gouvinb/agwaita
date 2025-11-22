@@ -1,7 +1,7 @@
 import Brightness from "../../../../services/Brightness"
 import {createState} from "ags"
-import {Gtk} from "../../../../../../../../../usr/share/ags/js/lib/gtk4";
-import {Dimensions} from "../../../../lib/ui/Dimensions";
+import {Gtk} from "../../../../../../../../../usr/share/ags/js/lib/gtk4"
+import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 interface BrightnessIconProps {
     onClicked?: () => void,

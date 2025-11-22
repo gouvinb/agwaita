@@ -1,8 +1,8 @@
 import {createBinding, createState, With} from "ags"
 import AstalBattery from "gi://AstalBattery"
 import {Accessor} from "gnim"
-import {Gtk} from "ags/gtk4";
-import {Dimensions} from "../../../../lib/ui/Dimensions";
+import {Gtk} from "ags/gtk4"
+import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 interface BatteryIconProps {
     battery: AstalBattery.Device
@@ -21,10 +21,10 @@ export default function BatteryIcon({battery}: BatteryIconProps) {
         }
 
         const percent = Math.round(percentage.get() * 100)
-        const charging = isCharging.get();
+        const charging = isCharging.get()
 
         if (charging) {
-            if (percent >= 100) return "battery-full-charging-symbolic";
+            if (percent >= 100) return "battery-full-charging-symbolic"
             if (percent >= 90) return "battery-level-90-charging-symbolic";
             if (percent >= 80) return "battery-level-80-charging-symbolic";
             if (percent >= 70) return "battery-level-70-charging-symbolic";

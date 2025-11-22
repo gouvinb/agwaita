@@ -1,7 +1,7 @@
 import {Gtk} from "ags/gtk4"
 import {createState} from "ags"
 import {interval, Timer} from "ags/time"
-import {shAsync} from "../../../../../lib/ExternalCommand";
+import {shAsync} from "../../../../../lib/ExternalCommand"
 import {Dimensions} from "../../../../../lib/ui/Dimensions";
 import {Log} from "../../../../../lib/Logger";
 import {Lifecycle} from "../../../../../lib/Lifecyle";
