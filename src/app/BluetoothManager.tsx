@@ -6,7 +6,6 @@ import GObject from "gnim/gobject"
 import {Shapes} from "../lib/ui/Shapes"
 import AstalBluetooth from "gi://AstalBluetooth"
 import {Log} from "../lib/Logger"
-import {interval, Timer} from "ags/time"
 
 export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
     const [currentAdapter, setCurrentAdapter] = createState(bluetooth.get_adapter())
@@ -37,7 +36,8 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
     // let deviceSettingsStackPage: Gtk.StackPage;
     // let bluetoothSettingsPage: Gtk.StackPage;
 
-    let globalBluetoothTick: Timer | null = null
+    const signalHandlers: number[] = []
+    const deviceSignalHandlers = new Map<string, number[]>()
 
     function getDeviceIcon(device: AstalBluetooth.Device) {
         const icon = device.icon || "";
@@ -94,8 +94,84 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
         });
     }
 
+    function setupAdapterSignals(adapter: AstalBluetooth.Adapter | null) {
+        if (!adapter) return
+
+        signalHandlers.push(
+            adapter.connect("notify::powered", () => {
+                setPowerState(adapter.powered)
+            })
+        )
+
+        signalHandlers.push(
+            adapter.connect("notify::discoverable", () => {
+                setDiscoverableState(adapter.discoverable)
+            })
+        )
+
+        signalHandlers.push(
+            adapter.connect("notify::discoverable-timeout", () => {
+                const timeout = adapter.discoverable_timeout
+                setDiscoverableTimeoutState(timeout)
+                timeout_time_adjustment.set_value(timeout / 60)
+            })
+        )
+
+        signalHandlers.push(
+            adapter.connect("notify::alias", () => {
+                setAliasState(adapter.alias)
+            })
+        )
+    }
+
+    function setupDeviceSignals(device: AstalBluetooth.Device) {
+        const deviceId = device.address
+        if (deviceSignalHandlers.has(deviceId)) return
+
+        const handlers: number[] = []
+
+        const properties = ['connected', 'paired', 'trusted', 'battery-percentage', 'alias', 'rssi']
+        properties.forEach(prop => {
+            handlers.push(
+                device.connect(`notify::${prop}`, () => updateDevices())
+            )
+        })
+
+        deviceSignalHandlers.set(deviceId, handlers)
+    }
+
+    function cleanupDeviceSignals(device: AstalBluetooth.Device) {
+        const deviceId = device.address
+        const handlers = deviceSignalHandlers.get(deviceId)
+        if (handlers) {
+            handlers.forEach(id => device.disconnect(id))
+            deviceSignalHandlers.delete(deviceId)
+        }
+    }
+
+    function updateDevices() {
+        const newDevices = sortDevices(bluetooth.get_devices())
+
+        newDevices.forEach(device => setupDeviceSignals(device))
+
+        setDevices(newDevices)
+    }
+
     onCleanup(() => {
-        globalBluetoothTick?.cancel()
+        const adapter = currentAdapter.get()
+        if (adapter) {
+            signalHandlers.forEach(id => adapter.disconnect(id))
+        }
+        signalHandlers.length = 0
+
+        deviceSignalHandlers.forEach((handlers, deviceId) => {
+            const device = bluetooth.get_devices().find(d => d.address === deviceId)
+            if (device) {
+                handlers.forEach(id => device.disconnect(id))
+            }
+        })
+        deviceSignalHandlers.clear()
+
         win.destroy()
     })
 
@@ -118,24 +194,37 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
             widthRequest={475}
             heightRequest={575}
             onShow={() => {
-                globalBluetoothTick = interval(1000, () => {
-                    const adapter = currentAdapter.get();
-                    setPowerState(adapter?.powered ?? false);
+                const adapter = currentAdapter.get()
+                setupAdapterSignals(adapter)
 
-                    setDiscoverableState(adapter?.discoverable ?? false);
+                signalHandlers.push(
+                    bluetooth.connect("device-added", () => updateDevices())
+                )
+                signalHandlers.push(
+                    bluetooth.connect("device-removed", (_, device) => {
+                        cleanupDeviceSignals(device)
+                        updateDevices()
+                    })
+                )
 
-                    setDiscoverableTimeoutState(adapter?.discoverable_timeout ?? 0);
-                    timeout_time_adjustment.set_value(adapter ? adapter.discoverable_timeout / 60 : 3);
-
-                    setAliasState(adapter?.alias ?? "Unknown");
-
-                    setDevices(sortDevices(bluetooth.get_devices()));
-                })
+                updateDevices()
             }}
             onCloseRequest={(self) => {
                 Log.d("Bluetooth", "Window closed")
                 self.hide()
-                globalBluetoothTick?.cancel()
+
+                const adapter = currentAdapter.get()
+                if (adapter) {
+                    signalHandlers.forEach(id => {
+                        try {
+                            adapter.disconnect(id)
+                        } catch {
+                            bluetooth.disconnect(id)
+                        }
+                    })
+                }
+                signalHandlers.length = 0
+
                 return true
             }}
             title="Bluetooth manager"
