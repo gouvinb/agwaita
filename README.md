@@ -8,7 +8,6 @@ A GTK Shell configuration that combines Adwaita and AGS.
 - [Niri](https://yalter.github.io/niri/) (because it's my main WM at the moment)
 - glib2 for using gsettings
 - pavucontrol (because I haven't yet developed the part for managing sound/microphone devices)
-- [overskride](https://github.com/kaii-lb/overskride) (because I haven't developed the Bluetooth device management part yet)
 - kvantum with kvantum-qt5 and kvantum-theme-libadwaita for using kvantummanager
 - swaylock and a preparation script
   `$XDG_LIB_HOME/desktop-scripts/prelock` (the latter is not published because it is only used to take a screenshot and pixelate it for swaylock, and can be replaced by anything else)
@@ -55,78 +54,13 @@ https://github.com/user-attachments/assets/c62d139e-97db-40b1-9957-5b8bfa0a4d12
 
 ## Roadmap
 
-### Source
+See [Agwaita's project](https://github.com/users/gouvinb/projects/4)
 
-- [x] Lifecyle system
-- [-] Logger system
-  - [x] API
-  - [ ] Environment variable
-- [ ] Use official Niri Astal API (not release yet)
+# Credits
 
-
-### - [-] Status bar
-
-#### Left side
-
-- [-] A component for displaying and managing Niri, Sway, and Hyprland workspaces (Niri prioritized)
-
-#### Center
-
-- [-] A component to display the date and time with subcomponents
-    - [x] A notification center on the left
-    - [x] `Gtk.Calendar` on the right
-    - [x] Displays the remaining events of the day below `Gtk.Calendar`
-
-#### Right side
-
-- [x] Systemd unit fail
-- [x] Systray with AstalTray
-- [-] A button consisting of several icons representing different parts of the OS status.
-    - [-] Icons :
-        - [ ] privacy (I had a very specific idea when writing this line, but I've forgotten it since)
-        - [x] brightness
-        - [x] volume
-        - [x] bluetooth
-        - [x] network
-        - [x] battery
-        - [x] power mode
-        - [x] Avatar
-    - [-] This button will open a submenu to display components for interacting with various parts of the system
-        - [x] Several buttons for
-            - [x] Lock the session
-            - [x] Session ended
-            - [x] Restart the PC
-            - [x] Turn off the PC
-        - [x] A slider for brightness
-        - [-] A slider for audio with a dropdown menu to select the default sink
-            - [x] Slider
-            - [-] Sink (for now, ags-shell redirects to pavucontrol)
-        - [x] A toggle button for airplane mode
-        - [x] A button for Power mode with a dropdown menu to choose the power supply mode
-            - [x] Button
-            - [x] Dropdown
-        - [x] A button for dark mode
-        - [x] An accent color button with a dropdown menu to choose one of the colors supported by Adwaita
-            - [x] Button
-            - [x] Dropdown
-        - [x] A button for do not disturb mode
-        - [-] A button for Bluetooth with a dropdown menu to manages devices
-            - [x] Button
-            - [-] Dropdown (for now, ags-shell redirects to alpha bluetooth manager window)
-
-### - [ ] Application launcher
-
-- [ ] Application grid sorted alphabetically (locale considered)
-- [ ] Search bar
-
-### - [x] Notification system
-
-- [x] Takes into account the DontDisturb function
-- [x] Scrollable
-- [x] Multimonitor
-- [x] Priority Management
-- [x] Action management
-- [x] Request handler to interact with notifications
+- [Gnome](https://www.gnome.org/) for Adwaita, gjs, and shell design
+- [ags](https://aylur.github.io/ags/) by Aylur for Ags, Gnim and Astal projects
+- [overskride](https://github.com/kaii-lb/overskride) by Kaii-lb for the design of her powerful bluetooth client
 
 # License
 
