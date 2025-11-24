@@ -17,7 +17,7 @@ A GTK Shell configuration that combines Adwaita and AGS.
     - systemd-networkd (because I never liked NetworkManager)
 - nushell for the make.nu file
 
-## Installation
+## Installation and running
 
 1. Install the required dependencies
 2. Clone this repository
@@ -26,10 +26,13 @@ A GTK Shell configuration that combines Adwaita and AGS.
     - Run the command `./make.nu -h` to see your options
     - Run the command `./make.nu -h` to see your options
     - Run the command `./make.nu hotrun` to test ags-shell without installation
-    - Run the command
-      `./make.nu install` to install ags-shell in the $XDG_BIN_HOME folder or the
-      `$HOME/.local/bin` folder, which allows you to access the
-      `ags-shell` command in your PATH
+    - Run the command `./make.nu install` to install ags-shell in the $XDG_BIN_HOME folder or the `$HOME/.local/bin` folder, which allows you to access the `ags-shell` command in your PATH
+
+### Log and debugging
+
+I have implemented a logging system by severity level (`CRITICAL`, `ERROR`, `WARNING`, `INFO`, and `DEBUG`). The default level is `INFO`. It is possible to change the log level using the environment variable `AGWAITA_LOG_LEVEL`. e.g. `AGWAITA_LOG_LEVEL=DEBUG ags-shell`
+
+`make.nu hotrun` also provides argument to set the log level (default: `DEBUG`). e.g `make.nu hotrun -l CRITICAL`
 
 ## Preview
 
