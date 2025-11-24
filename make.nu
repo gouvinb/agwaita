@@ -33,6 +33,10 @@ def commands_check [] {
   [ "install" "build" "hotrun" "run" "check" "clean" "init" ]
 }
 
+def agwaita_log_level [] {
+  ["CRITICAL" "ERROR" "WARNING" "INFO" "DEBUG"]
+}
+
 # Script
 
 # Build and install `ags-shell`
@@ -55,10 +59,14 @@ def "main build" [] {
 }
 
 # Run `ags-shell` directly
-def "main hotrun" [] {
+def "main hotrun" [
+  --log-level(-l): string@agwaita_log_level = "DEBUG"
+] {
   main init
   log info "run with ags directly..."
-  ags run ./app.tsx
+  with-env {AGWAITA_LOG_LEVEL: $log_level} {
+    ags run ./app.tsx
+  }
 }
 
 # Build and run `ags-shell` binary
