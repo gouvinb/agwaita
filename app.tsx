@@ -16,6 +16,7 @@ import PowerProfiles from "gi://AstalPowerProfiles"
 import Tray from "gi://AstalTray"
 import Agenda from "./src/services/Agenda";
 import Brightness from "./src/services/Brightness";
+import PowerMenu from "./src/app/PowerMenu";
 
 app.start({
     css: style,
@@ -58,6 +59,8 @@ app.start({
         const brightness = Brightness.get_default()
 
         BluetoothManager(bluetooth)
+
+        PowerMenu()
 
         Notifications(notifd)
 
