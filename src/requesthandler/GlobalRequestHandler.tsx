@@ -2,6 +2,7 @@ import {CommandDef, RequestHandler} from "./RequestHandlerParser"
 import {BarRequestHandler} from "./impl/BarRequestHandler"
 import {NotificationsRequestHandler} from "./impl/NotificationsRequestHandler"
 import {BluetoothRequestHandler} from "./impl/BluetoothRequestHandler";
+import {PowerMenuRequestHandler} from "./impl/PowerMenuRequestHandler";
 
 export class GlobalRequestHandler implements RequestHandler {
     response: (response: string) => void
@@ -25,6 +26,11 @@ export class GlobalRequestHandler implements RequestHandler {
             {
                 name: "bluetooth",
                 handler: new BluetoothRequestHandler(this.response, "bluetooth"),
+                args: [],
+            },
+            {
+                name: "powermenu",
+                handler: new PowerMenuRequestHandler(this.response, "powermenu"),
                 args: [],
             },
         ]
