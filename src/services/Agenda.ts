@@ -4,7 +4,7 @@ import ECal from "gi://ECal"
 import ICalGLib from "gi://ICalGLib"
 import GObject, {getter, register} from "gnim/gobject"
 import {Log} from "../lib/Logger"
-import {Accessor, createState, Setter} from "ags"
+import {Accessor, createEffect, createState, Setter} from "ags"
 
 export type CalendarEvent = {
     summary: string
@@ -34,7 +34,7 @@ export default class Agenda extends GObject.Object {
 
 
     #eventsState: Accessor<CalendarEvent[]>
-    #setEventsState: Setter<CalendarEvent[]>
+    readonly #setEventsState: Setter<CalendarEvent[]>
     #eventsSubscription: (() => void) | null = null
 
     constructor() {
@@ -44,10 +44,11 @@ export default class Agenda extends GObject.Object {
         this.#eventsState = events
         this.#setEventsState = setEvents
 
-        this.#eventsSubscription = this.#eventsState.subscribe(() => {
-            this.#events = this.#eventsState.get()
+        createEffect(() => {
+            this.#events = this.#eventsState()
             this.notify("events")
         })
+
     }
 
     @getter(Array)

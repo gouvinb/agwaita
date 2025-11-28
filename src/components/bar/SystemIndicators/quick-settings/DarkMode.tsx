@@ -43,10 +43,10 @@ export default function DarkModeButtonQS(
             css={`
                 min-width: ${minWidth}px;
             `}
-            active={mode.get() == "prefer-dark"}
+            active={mode.peek() == "prefer-dark"}
             onClicked={async () => {
-                const adwColorScheme = mode.get() == "prefer-dark" ? "prefer-light" : "prefer-dark"
-                const kvColorScheme = mode.get() == "prefer-dark" ? "KvLibadwaita" : "KvLibadwaitaDark"
+                const adwColorScheme = mode.peek() == "prefer-dark" ? "prefer-light" : "prefer-dark"
+                const kvColorScheme = mode.peek() == "prefer-dark" ? "KvLibadwaita" : "KvLibadwaitaDark"
 
                 await shAsync(`gsettings set org.gnome.desktop.interface color-scheme ${adwColorScheme}`)
                     .then(_ => updateDarkModeState())

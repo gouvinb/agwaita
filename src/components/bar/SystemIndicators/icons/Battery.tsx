@@ -1,4 +1,4 @@
-import {createBinding, createState, With} from "ags"
+import {createBinding, createEffect, createState, With} from "ags"
 import AstalBattery from "gi://AstalBattery"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
@@ -15,53 +15,46 @@ export default function BatteryIcon({battery}: BatteryIconProps) {
 
     const [icon, setIcon] = createState<string>("battery-missing-symbolic")
 
-    function resolveIcon(): string {
-        if (!isPresent.get()) {
-            return "battery-missing-symbolic"
-        }
+    createEffect(() => {
+        let newIcon: string
 
-        const percent = Math.round(percentage.get() * 100)
-        const charging = isCharging.get()
-
-        if (charging) {
-            if (percent >= 100) return "battery-full-charging-symbolic"
-            if (percent >= 90) return "battery-level-90-charging-symbolic";
-            if (percent >= 80) return "battery-level-80-charging-symbolic";
-            if (percent >= 70) return "battery-level-70-charging-symbolic";
-            if (percent >= 60) return "battery-level-60-charging-symbolic";
-            if (percent >= 50) return "battery-level-50-charging-symbolic";
-            if (percent >= 40) return "battery-level-40-charging-symbolic";
-            if (percent >= 30) return "battery-level-30-charging-symbolic";
-            if (percent >= 20) return "battery-level-20-charging-symbolic";
-            if (percent >= 10) return "battery-level-10-charging-symbolic";
-            return "battery-level-0-charging-symbolic";
+        if (!isPresent()) {
+            newIcon = "battery-missing-symbolic"
         } else {
-            if (percent >= 100) return "battery-level-100-symbolic";
-            if (percent >= 90) return "battery-level-90-symbolic";
-            if (percent >= 80) return "battery-level-80-symbolic";
-            if (percent >= 70) return "battery-level-70-symbolic";
-            if (percent >= 60) return "battery-level-60-symbolic";
-            if (percent >= 50) return "battery-level-50-symbolic";
-            if (percent >= 40) return "battery-level-40-symbolic";
-            if (percent >= 30) return "battery-level-30-symbolic";
-            if (percent >= 20) return "battery-level-20-symbolic";
-            if (percent >= 10) return "battery-level-10-symbolic";
-            return "battery-level-0-symbolic";
-        }
-    }
+            const percent = Math.round(percentage() * 100)
+            const charging = isCharging()
 
-    function updateIcon() {
-        const newIcon = resolveIcon();
-        if (icon.get() !== newIcon) {
+            if (charging) {
+                newIcon = "battery-level-0-charging-symbolic";
+                if (percent >= 10) newIcon = "battery-level-10-charging-symbolic"
+                if (percent >= 20) newIcon = "battery-level-20-charging-symbolic"
+                if (percent >= 30) newIcon = "battery-level-30-charging-symbolic"
+                if (percent >= 40) newIcon = "battery-level-40-charging-symbolic"
+                if (percent >= 50) newIcon = "battery-level-50-charging-symbolic"
+                if (percent >= 60) newIcon = "battery-level-60-charging-symbolic"
+                if (percent >= 70) newIcon = "battery-level-70-charging-symbolic"
+                if (percent >= 80) newIcon = "battery-level-80-charging-symbolic"
+                if (percent >= 90) newIcon = "battery-level-90-charging-symbolic"
+                if (percent >= 100) newIcon = "battery-full-charging-symbolic"
+            } else {
+                newIcon = "battery-level-0-symbolic";
+                if (percent >= 10) newIcon = "battery-level-10-symbolic"
+                if (percent >= 20) newIcon = "battery-level-20-symbolic"
+                if (percent >= 30) newIcon = "battery-level-30-symbolic"
+                if (percent >= 40) newIcon = "battery-level-40-symbolic"
+                if (percent >= 50) newIcon = "battery-level-50-symbolic"
+                if (percent >= 60) newIcon = "battery-level-60-symbolic"
+                if (percent >= 70) newIcon = "battery-level-70-symbolic"
+                if (percent >= 80) newIcon = "battery-level-80-symbolic"
+                if (percent >= 90) newIcon = "battery-level-90-symbolic"
+                if (percent >= 100) newIcon = "battery-level-100-symbolic"
+            }
+        }
+
+        if (icon.peek() !== newIcon) {
             setIcon(newIcon);
         }
-    }
-
-    updateIcon();
-
-    percentage.subscribe(() => updateIcon());
-    isCharging.subscribe(() => updateIcon());
-    isPresent.subscribe(() => updateIcon());
+    })
 
     return (
         <box spacing={Dimensions.smallSpacing}>
@@ -71,7 +64,7 @@ export default function BatteryIcon({battery}: BatteryIconProps) {
             />
             <With value={isPresent}>
                 {(isPresent) => isPresent && (
-                    <label label={`${Math.round(percentage.get() * 100)}%`}/>
+                    <label label={`${Math.round(percentage.peek() * 100)}%`}/>
                 ) || (
                     <label label="!"/>
                 )}

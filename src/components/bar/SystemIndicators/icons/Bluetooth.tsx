@@ -1,4 +1,4 @@
-import {createBinding, createState, With} from "ags"
+import {createBinding, createEffect, createState, With} from "ags"
 import AstalBluetooth from "gi://AstalBluetooth"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
@@ -12,39 +12,26 @@ export default function BluetoothIcon({bluetooth}: BluetoothProps) {
     const isPowered = createBinding(bluetooth, "isPowered") as Accessor<boolean>
     const isConnected: Accessor<boolean> = createBinding(bluetooth, "isConnected") as Accessor<boolean>
 
-    const [icon, setIcon] = createState<string>(resolveStatusIcon())
-    const [connectedDevices, setConnectedDevices] = createState<number>(resolveConnectedDevicesCount())
+    const [icon, setIcon] = createState<string>("bluetooth-active-symbolic")
+    const [connectedDevices, setConnectedDevices] = createState<number>(0)
 
-    function bluetoothUpdateCallback() {
-        return () => {
-            const newIcon = resolveStatusIcon()
-            setIcon(newIcon)
-
-            const newCount = resolveConnectedDevicesCount()
-            setConnectedDevices(newCount)
+    createEffect(() => {
+        let newIcon = "bluetooth-active-symbolic"
+        if (!isPowered()) {
+            newIcon = "bluetooth-hardware-disabled-symbolic"
+        } else if (devices().filter((device) => device.connected).length == 0) {
+            newIcon = "bluetooth-disabled-symbolic"
         }
-    }
+        setIcon(newIcon)
 
-    devices.subscribe(bluetoothUpdateCallback())
-    isPowered.subscribe(bluetoothUpdateCallback())
-    isConnected.subscribe(bluetoothUpdateCallback())
-
-    function resolveStatusIcon() {
-        if (!isPowered.get()) {
-            return "bluetooth-hardware-disabled-symbolic"
-        } else if (Array.from(devices.get()).filter((device) => device.connected).length == 0) {
-            return "bluetooth-disabled-symbolic"
+        let newCount: number
+        if (!isPowered() && !isConnected()) {
+            newCount = 0
         } else {
-            return "bluetooth-active-symbolic"
+            newCount = Array.from(devices()).filter((device) => device.connected).length
         }
-    }
-
-    function resolveConnectedDevicesCount() {
-        if (!isPowered.get() && !isConnected.get()) {
-            return 0
-        }
-        return Array.from(devices.get()).filter((device) => device.connected).length
-    }
+        setConnectedDevices(newCount)
+    })
 
     return (
         <box>
@@ -58,7 +45,7 @@ export default function BluetoothIcon({bluetooth}: BluetoothProps) {
                         font-size: xx-small;
                     `}
                     use_markup
-                    label={'<span baseline_shift="superscript">' + connectedDevices.get().toString() + '</span>'}
+                    label={'<span baseline_shift="superscript">' + connectedDevices.peek().toString() + '</span>'}
                 />
                 }
             </With>

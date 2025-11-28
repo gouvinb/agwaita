@@ -65,7 +65,7 @@ export default function AccentColorRevealerQS(
         shAsync("gsettings get org.gnome.desktop.interface accent-color")
             .then(output => {
                 setAccentColor(output.trim().replaceAll("'", ""))
-                updateTB(accentColor.get())
+                updateTB(accentColor.peek())
             })
             .catch((err) => Log.e("AccentColorRevealerQS", `Cannot get accent color`, err));
     }

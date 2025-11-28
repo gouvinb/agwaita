@@ -19,7 +19,7 @@ export default function BrightnessIcon(
 
     brightness.connect("notify::screen", () => {
         const newIcon = resolveIcon(brightness.screen)
-        if (icon.get() !== newIcon) {
+        if (icon.peek() !== newIcon) {
             setIcon(newIcon)
         }
     })

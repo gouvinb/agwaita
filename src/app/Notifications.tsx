@@ -1,6 +1,6 @@
 import {Astal, Gtk} from "ags/gtk4"
 import app from "ags/gtk4/app"
-import {Accessor, createBinding, createComputed, createState, For, onCleanup} from "ags"
+import {Accessor, createBinding, createEffect, createState, For, onCleanup} from "ags"
 import Notification from "../components/notifications/Notification"
 import AstalNotifd from "gi://AstalNotifd"
 import {Dimensions} from "../lib/ui/Dimensions"
@@ -39,7 +39,11 @@ export function Notifications(notifd: AstalNotifd.Notifd) {
         setNotificationsOverlay(notificationsResolved)
     })
 
-    const visible = createComputed([notificationsOverlay, doNotDisturb], (ns, dnd) => ns.length > 0 && !dnd)
+    const [visible, setVisible] = createState(false)
+
+    createEffect(() => {
+        setVisible(notificationsOverlay().length > 0 && !doNotDisturb())
+    }, {immediate: false})
 
     let win: Astal.Window
 

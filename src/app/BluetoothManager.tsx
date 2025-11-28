@@ -1,6 +1,6 @@
 import Adw from "gi://Adw"
 import app from "ags/gtk4/app"
-import {createState, For, onCleanup, With} from "ags"
+import {createEffect, createState, For, onCleanup, With} from "ags"
 import {Gtk} from "ags/gtk4"
 import GObject from "gnim/gobject"
 import {Shapes} from "../lib/ui/Shapes"
@@ -10,10 +10,10 @@ import {Log} from "../lib/Logger"
 export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
     const [currentAdapter, setCurrentAdapter] = createState(bluetooth.get_adapter())
 
-    const [powerState, setPowerState] = createState(currentAdapter.get()?.powered ?? false)
-    const [discoverableState, setDiscoverableState] = createState(currentAdapter.get()?.discoverable ?? false)
-    const [discoverableTimeoutState, setDiscoverableTimeoutState] = createState(currentAdapter.get()?.discoverable_timeout ?? 0);
-    const [adapterAliasState, setAliasState] = createState(currentAdapter.get()?.alias ?? "Unknown");
+    const [powerState, setPowerState] = createState(currentAdapter.peek()?.powered ?? false)
+    const [discoverableState, setDiscoverableState] = createState(currentAdapter.peek()?.discoverable ?? false)
+    const [discoverableTimeoutState, setDiscoverableTimeoutState] = createState(currentAdapter.peek()?.discoverable_timeout ?? 0);
+    const [adapterAliasState, setAliasState] = createState(currentAdapter.peek()?.alias ?? "Unknown");
     const [devices, setDevices] = createState<AstalBluetooth.Device[]>([]);
     const [selectedDevice, setSelectedDevice] = createState<AstalBluetooth.Device | null>(null);
 
@@ -21,7 +21,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
         step_increment: 1,
         lower: 0,
         upper: 3,
-        value: discoverableTimeoutState.get(),
+        value: discoverableTimeoutState.peek(),
     });
 
     let win: Adw.Window;
@@ -158,7 +158,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
     }
 
     onCleanup(() => {
-        const adapter = currentAdapter.get()
+        const adapter = currentAdapter.peek()
         if (adapter) {
             signalHandlers.forEach(id => adapter.disconnect(id))
         }
@@ -179,7 +179,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
         switch (position) {
             case 0:
                 return `border-radius: ${Shapes.windowRadius}px ${Shapes.windowRadius}px 0 0;`
-            case devices.get().length - 1:
+            case devices.peek().length - 1:
                 return `border-radius: 0 0 ${Shapes.windowRadius}px ${Shapes.windowRadius}px;`
             default:
                 return ""
@@ -194,7 +194,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
             widthRequest={475}
             heightRequest={575}
             onShow={() => {
-                const adapter = currentAdapter.get()
+                const adapter = currentAdapter.peek()
                 setupAdapterSignals(adapter)
 
                 signalHandlers.push(
@@ -213,7 +213,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                 Log.d("Bluetooth", "Window closed")
                 self.hide()
 
-                const adapter = currentAdapter.get()
+                const adapter = currentAdapter.peek()
                 if (adapter) {
                     signalHandlers.forEach(id => {
                         try {
@@ -298,15 +298,15 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                 self.set_selection_mode(Gtk.SelectionMode.SINGLE);
 
                                                 self.select_row(self.get_first_child() as Gtk.ListBoxRow);
-                                                selectedDevice.subscribe(() => {
-                                                    const device = selectedDevice.get();
-                                                    if (!device) {
+
+                                                createEffect(() => {
+                                                    if (!selectedDevice() && mainListBox) {
                                                         mainListBox.unselect_all()
                                                     } else {
                                                         self.unselect_all()
                                                     }
-                                                });
 
+                                                })
                                             }}
                                             css={`
                                                 border-radius: ${Shapes.windowRadius}px;
@@ -345,9 +345,9 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                 active={currentAdapter.as(a => a?.discoverable ?? false)}
                                                 onNotifyActive={(self) => {
                                                     if (self.active) {
-                                                        currentAdapter.get()?.start_discovery()
+                                                        currentAdapter.peek()?.start_discovery()
                                                     } else {
-                                                        currentAdapter.get()?.stop_discovery()
+                                                        currentAdapter.peek()?.stop_discovery()
                                                     }
                                                 }}
                                             />
@@ -420,11 +420,11 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                                     Log.d("Bluetooth", `Device: ${device.name} ${device.trusted}`)
                                                                     return <Adw.ActionRow
                                                                         $={(self) => {
-                                                                            if (selectedDevice.get()?.address === device.address) {
+                                                                            if (selectedDevice.peek()?.address === device.address) {
                                                                                 mainListBox.select_row(self)
                                                                             }
                                                                         }}
-                                                                        css={applyCssForDeviceRow(index.get())}
+                                                                        css={applyCssForDeviceRow(index.peek())}
                                                                         title={device.name || device.alias || "Unknown Device"}
                                                                         subtitle={device.address}
                                                                         activatable
@@ -548,7 +548,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             title="Powered"
                                                             active={powerState}
                                                             onNotifyActive={(self) => {
-                                                                const adapter = currentAdapter.get();
+                                                                const adapter = currentAdapter.peek();
                                                                 Log.d("Bluetooth", `onNotifyActive - Powered: ${self.active} for ${adapter?.alias ?? "Unknown"}`)
                                                                 if (adapter) {
                                                                     adapter.powered = self.active;
@@ -560,7 +560,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             subtitle="visible to others?"
                                                             active={discoverableState}
                                                             onNotifyActive={(self) => {
-                                                                const adapter = currentAdapter.get();
+                                                                const adapter = currentAdapter.peek();
                                                                 if (adapter) {
                                                                     adapter.discoverable = self.active;
                                                                 }
@@ -574,7 +574,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                     >
                                                         <Adw.ExpanderRow
                                                             title="Current Bluetooth Adapter"
-                                                            subtitle={currentAdapter.get()?.alias ?? "No adapter"}
+                                                            subtitle={currentAdapter.peek()?.alias ?? "No adapter"}
                                                             showEnableSwitch={false}
                                                         >
                                                             {bluetooth.get_adapters().map((adapterItem) => (
@@ -591,7 +591,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                                         setAliasState(adapterItem.alias);
                                                                     }}
                                                                 >
-                                                                    {currentAdapter.get()?.address === adapterItem.address && (
+                                                                    {currentAdapter.peek()?.address === adapterItem.address && (
                                                                         <Gtk.Box $type={"suffix"}>
                                                                             <Gtk.Image iconName="object-select-symbolic"/>
                                                                         </Gtk.Box>
@@ -609,7 +609,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             adjustment={timeout_time_adjustment}
                                                             value={discoverableTimeoutState}
                                                             onNotifyValue={(self) => {
-                                                                const adapter = currentAdapter.get();
+                                                                const adapter = currentAdapter.peek();
                                                                 Log.d("Bluetooth", `onNotifyValue - Discoverable Timeout: ${self.value} minutes for ${adapter?.alias ?? "Unknown"}`)
                                                                 if (adapter) {
                                                                     adapter.discoverable_timeout = self.value * 60;
@@ -623,7 +623,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             inputPurpose={Gtk.InputPurpose.ALPHA}
                                                             showApplyButton
                                                             onApply={(self) => {
-                                                                const adapter = currentAdapter.get();
+                                                                const adapter = currentAdapter.peek();
                                                                 if (adapter) {
                                                                     adapter.alias = self.text;
                                                                 }
@@ -728,7 +728,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             title="Connected"
                                                             active={selectedDevice.as(d => d?.connected ?? false)}
                                                             onNotifyActive={(self) => {
-                                                                const device = selectedDevice.get();
+                                                                const device = selectedDevice.peek();
                                                                 if (device) {
                                                                     self.sensitive = false
                                                                     if (self.active) {
@@ -775,7 +775,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             inputPurpose={Gtk.InputPurpose.ALPHA}
                                                             showApplyButton
                                                             onApply={(self) => {
-                                                                const device = selectedDevice.get();
+                                                                const device = selectedDevice.peek();
                                                                 if (device) {
                                                                     device.alias = self.text;
                                                                 }
@@ -785,7 +785,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             title="Trusted"
                                                             active={selectedDevice.as(d => d?.trusted ?? false)}
                                                             onNotifyActive={(self) => {
-                                                                const device = selectedDevice.get();
+                                                                const device = selectedDevice.peek();
                                                                 if (device) {
                                                                     device.trusted = self.active;
                                                                 }
@@ -795,7 +795,7 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             title="Blocked"
                                                             active={selectedDevice.as(d => d?.blocked ?? false)}
                                                             onNotifyActive={(self) => {
-                                                                const device = selectedDevice.get();
+                                                                const device = selectedDevice.peek();
                                                                 if (device) {
                                                                     device.blocked = self.active;
                                                                 }
@@ -858,9 +858,9 @@ export default function BluetoothManager(bluetooth: AstalBluetooth.Bluetooth) {
                                                             `}
                                                             label="Remove Device"
                                                             onClicked={() => {
-                                                                const device = selectedDevice.get();
+                                                                const device = selectedDevice.peek();
                                                                 if (device) {
-                                                                    const adapter = currentAdapter.get();
+                                                                    const adapter = currentAdapter.peek();
                                                                     if (adapter) {
                                                                         adapter.remove_device(device);
                                                                         setSelectedDevice(null);

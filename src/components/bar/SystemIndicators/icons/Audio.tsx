@@ -1,11 +1,12 @@
-import {createBinding, createState} from "ags"
+import {createBinding, createEffect, createState} from "ags"
 import AstalWp from "gi://AstalWp"
 import {Accessor} from "gnim"
 import {Gtk} from "ags/gtk4"
 import {Dimensions} from "../../../../lib/ui/Dimensions"
 
 interface AudioIconProps {
-    onClicked?: () => void, wp: AstalWp.Wp
+    onClicked?: () => void,
+    wp: AstalWp.Wp
 }
 
 export default function AudioIcon({onClicked, wp}: AudioIconProps) {
@@ -14,34 +15,26 @@ export default function AudioIcon({onClicked, wp}: AudioIconProps) {
     const defaultSpeakerVolume: Accessor<number> = createBinding(speaker, "volume")
     const defaultSpeakerIsMuted: Accessor<boolean> = createBinding(speaker, "mute")
 
-    const [icon, setIcon] = createState<string>(resolveIcon())
+    const [icon, setIcon] = createState<string>("audio-volume-overamplified-symbolic")
 
-    function defaultSpeakerUpdateCallback() {
-        return () => {
-            const newIcon = resolveIcon()
-            if (icon.get() != newIcon) {
-                setIcon(newIcon)
-            }
-        }
-    }
-
-    defaultSpeakerVolume.subscribe(defaultSpeakerUpdateCallback())
-    defaultSpeakerIsMuted.subscribe(defaultSpeakerUpdateCallback())
-
-    function resolveIcon() {
-        const volumePercent = defaultSpeakerVolume.get() * 100
-        if (volumePercent == 0 || defaultSpeakerIsMuted.get()) {
-            return "audio-volume-muted-symbolic"
+    createEffect(() => {
+        const volumePercent = defaultSpeakerVolume() * 100
+        let newIcon: string = "audio-volume-overamplified-symbolic"
+        if (volumePercent == 0 || defaultSpeakerIsMuted()) {
+            newIcon = "audio-volume-muted-symbolic"
         } else if (volumePercent < 34) {
-            return "audio-volume-low-symbolic"
+            newIcon = "audio-volume-low-symbolic"
         } else if (volumePercent < 67) {
-            return "audio-volume-medium-symbolic"
+            newIcon = "audio-volume-medium-symbolic"
         } else if (volumePercent <= 100) {
-            return "audio-volume-high-symbolic"
-        } else {
-            return "audio-volume-overamplified-symbolic"
+            newIcon = "audio-volume-high-symbolic"
         }
-    }
+
+        if (icon.peek() != newIcon) {
+            setIcon(newIcon)
+        }
+    })
+
 
     return (
         onClicked === undefined ? (
