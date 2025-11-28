@@ -166,9 +166,14 @@ export default function Notification(
                                 halign={Gtk.Align.START}
                                 wrap
                                 useMarkup
-                                label={notification.body
-                                    .replace(/&/g, "&amp;")
-                                    .replace("<br/>", "\n")
+                                label={
+                                    // notification.body
+                                    //         .replace("<", "&lt;")
+                                    //         .replace(">", "&gt;")
+                                    //         .replace("&", "&amp;")
+                                    //         .replace(/&/g, "&amp;")
+                                    //         .replace("<br/>", "\n")
+                                    GLib.markup_escape_text(notification.body, -1)
                                 }
                             />
                         )}

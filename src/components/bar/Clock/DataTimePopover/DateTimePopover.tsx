@@ -1,4 +1,4 @@
-import {Accessor, createState, onCleanup} from "ags"
+import {Accessor, createEffect, createState, onCleanup} from "ags"
 import {Gtk} from "ags/gtk4"
 import {interval, Timer} from "ags/time"
 import GLib from "gi://GLib"
@@ -26,18 +26,18 @@ export function DataTimePopover(
 
     let rawDateTimeTimer: Timer | null = null
 
-    const [calendarSelectedDate, setCalendarSelectedDate] = createState<GLib.DateTime>(rawDateTime.get())
+    const [calendarSelectedDate, setCalendarSelectedDate] = createState<GLib.DateTime>(rawDateTime.peek())
     const calendarSelectedDateFormatted = calendarSelectedDate.as((date) => date.format("%A %d %b %Y")!.capitalize())
 
     const [eventsAccessor, setEvents] = createState<CalendarEvent[]>([])
 
     const todayEventsAccessor: Accessor<CalendarEvent[]> = eventsAccessor.as((events) =>
-        events.filter((event) => event.start.format("%Y%m%d")! === (rawDateTime?.get().format("%Y%m%d") ?? ""))
+        events.filter((event) => event.start.format("%Y%m%d")! === (rawDateTime?.peek().format("%Y%m%d") ?? ""))
     )
 
 
     const selectedDayEventsAccessor: Accessor<CalendarEvent[]> = calendarSelectedDate.as((date: GLib.DateTime) =>
-        eventsAccessor.get().filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
+        eventsAccessor.peek().filter((event) => event.start.format("%Y%m%d")! === date.format("%Y%m%d")!)
     )
 
     let eventNotifier: number | null = agenda.connect("notify::events", () => setEvents(agenda.events))
@@ -50,7 +50,7 @@ export function DataTimePopover(
         const currentYear = calendar.get_date().get_year();
         const currentMonth = calendar.get_date().get_month();
 
-        eventsAccessor.get().forEach((event) => {
+        eventsAccessor().forEach((event) => {
             const dateStr = event.start.format("%Y%m%d")!;
             const year = parseInt(dateStr.substring(0, 4));
             const month = parseInt(dateStr.substring(4, 6));
@@ -85,7 +85,7 @@ export function DataTimePopover(
     onCleanup(() => {
     })
 
-    eventsAccessor.subscribe(markCalendar);
+    createEffect(markCalendar)
 
     return (
         <box
@@ -118,7 +118,7 @@ export function DataTimePopover(
                         <EventList
                             title={calendarSelectedDateFormatted}
                             events={selectedDayEventsAccessor}
-                            predicate={(eventList) => !DateTimeExt.isToday(calendarSelectedDate.get()) && eventList.length > 0}
+                            predicate={(eventList) => !DateTimeExt.isToday(calendarSelectedDate.peek()) && eventList.length > 0}
                         />
                     </box>
                 </box>

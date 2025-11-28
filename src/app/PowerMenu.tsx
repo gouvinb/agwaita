@@ -57,17 +57,6 @@ export default function PowerMenu() {
         win.destroy()
     })
 
-    function applyCssForDeviceRow(position: number) {
-        switch (position) {
-            case 0:
-                return `border-radius: ${Shapes.windowRadius}px ${Shapes.windowRadius}px 0 0;`
-            case powerMenuEntries.get().length - 1:
-                return `border-radius: 0 0 ${Shapes.windowRadius}px ${Shapes.windowRadius}px;`
-            default:
-                return ""
-        }
-    }
-
     return (
         <window
             $={(self) => win = self}
@@ -116,7 +105,7 @@ export default function PowerMenu() {
                     <For each={powerMenuEntries}>
                         {(entry, index) => (
                             <Adw.ActionRow
-                                name={`power-menu-entry-${index.get()}`}
+                                name={`power-menu-entry-${index.peek()}`}
                                 css={`
                                     border-radius: ${Shapes.componentRadius}px;
                                 `}

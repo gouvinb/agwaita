@@ -1,4 +1,4 @@
-import {createBinding, createState} from "ags"
+import {createBinding, createEffect, createState} from "ags"
 import {Gtk} from "ags/gtk4"
 import AstalNotifd from "gi://AstalNotifd"
 import {Accessor} from "gnim"
@@ -11,21 +11,15 @@ export default function DoNotDisturbIcon({notifd}: DotNotDisturbIconProps) {
     const dontDisturb: Accessor<boolean> = createBinding(notifd, "dontDisturb")
     const [iconName, setIconName] = createState<string>("org.gnome.Settings-notifications-symbolic")
 
-    function updateIcon() {
-        const newIcon = dontDisturb.get()
+    createEffect(() => {
+        const newIcon = dontDisturb()
             ? "notifications-disabled-symbolic"
             : "org.gnome.Settings-notifications-symbolic"
 
-        if (iconName.get() !== newIcon) {
+        if (iconName.peek() !== newIcon) {
             setIconName(newIcon)
         }
-    }
-
-    dontDisturb.subscribe(() => {
-        updateIcon()
     })
-
-    updateIcon()
 
     return (
         <image

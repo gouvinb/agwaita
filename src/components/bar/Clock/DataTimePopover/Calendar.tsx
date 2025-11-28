@@ -41,8 +41,8 @@ export function Calendar(
         rawDateTimeTimer?.cancel()
         rawDateTimeTimer = null
         calendar.hide()
-        calendar.set_date(rawDateTime.get())
-        calendar.select_day(rawDateTime.get())
+        calendar.set_date(rawDateTime.peek())
+        calendar.select_day(rawDateTime.peek())
     })
 
     return (

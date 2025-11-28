@@ -54,7 +54,7 @@ export function AirplaneModeButtonQS(
             css={`
                 min-width: ${minWidth}px;
             `}
-            active={mode.get() == "down"}
+            active={mode.peek() == "down"}
             onClicked={async () => {
                 await DesktopScriptLib.execAsync("airplane_mode toggle")
                     .then(_ => {
