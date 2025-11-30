@@ -50,16 +50,22 @@ export function DataTimePopover(
         const currentYear = calendar.get_date().get_year();
         const currentMonth = calendar.get_date().get_month();
 
+        const daysToMark = new Set<number>();
+
         eventsAccessor().forEach((event) => {
             const dateStr = event.start.format("%Y%m%d")!;
             const year = parseInt(dateStr.substring(0, 4));
             const month = parseInt(dateStr.substring(4, 6));
-            const day = parseInt(dateStr.substring(6, 8));
 
-            if (year === currentYear && month === currentMonth) {
-                calendar.mark_day(day);
+            if (year !== currentYear || month !== currentMonth) {
+                return;
             }
+
+            const day = parseInt(dateStr.substring(6, 8));
+            daysToMark.add(day);
         });
+
+        daysToMark.forEach(day => calendar.mark_day(day));
     }
 
     const updateDaySelected = (calendar: Gtk.Calendar) => setCalendarSelectedDate(calendar.get_date())

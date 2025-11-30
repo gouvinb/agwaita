@@ -14,6 +14,7 @@ import AstalNotifd from "gi://AstalNotifd"
 import AstalWp from "gi://AstalWp"
 import PowerProfiles from "gi://AstalPowerProfiles"
 import Tray from "gi://AstalTray"
+import GLib from "gi://GLib"
 import Agenda from "./src/services/Agenda";
 import Brightness from "./src/services/Brightness";
 import PowerMenu from "./src/app/PowerMenu";
@@ -54,7 +55,7 @@ app.start({
         const powerprofiles = PowerProfiles.get_default()
         const tray = Tray.get_default()
 
-        const agenda = Agenda.get_with_signals_initialized()
+        const agenda = Agenda.get_default()
 
         const brightness = Brightness.get_default()
 
@@ -63,6 +64,11 @@ app.start({
         PowerMenu()
 
         Notifications(notifd)
+
+        GLib.idle_add(GLib.PRIORITY_LOW, () => {
+            agenda.initAllSignals()
+            return GLib.SOURCE_REMOVE
+        })
 
         onCleanup(() => {
             agenda.stopAllSignals()

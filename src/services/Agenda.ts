@@ -31,6 +31,7 @@ export default class Agenda extends GObject.Object {
 
     #sourceRegistrySignals: number[] = []
     #clientViewSignals: Map<ECal.ClientView, number[]> = new Map()
+    #refreshEventsTimeoutId: number | null = null
 
 
     #eventsState: Accessor<CalendarEvent[]>
@@ -95,6 +96,12 @@ export default class Agenda extends GObject.Object {
         if (this.#eventsSubscription) {
             this.#eventsSubscription()
             this.#eventsSubscription = null
+        }
+
+        // Cancel any pending refresh
+        if (this.#refreshEventsTimeoutId !== null) {
+            GLib.Source.remove(this.#refreshEventsTimeoutId)
+            this.#refreshEventsTimeoutId = null
         }
 
         this.#clientViews.forEach(view => {
@@ -322,7 +329,15 @@ export default class Agenda extends GObject.Object {
     }
 
     #refreshEvents() {
-        this.#setEventsState(this.#listCalendarEvents())
+        if (this.#refreshEventsTimeoutId !== null) {
+            GLib.Source.remove(this.#refreshEventsTimeoutId)
+        }
+
+        this.#refreshEventsTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
+            this.#setEventsState(this.#listCalendarEvents())
+            this.#refreshEventsTimeoutId = null
+            return GLib.SOURCE_REMOVE
+        })
     }
 
     #listCalendarEvents(): CalendarEvent[] {
