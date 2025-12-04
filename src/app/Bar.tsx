@@ -16,6 +16,7 @@ import PowerProfiles from "gi://AstalPowerProfiles"
 import Tray from "gi://AstalTray"
 import Agenda from "../services/Agenda"
 import Brightness from "../services/Brightness";
+import PrivacyIndicator from "../components/bar/PrivacyIndicator";
 
 interface BarProps {
     gdkmonitor: Gdk.Monitor,
@@ -91,6 +92,7 @@ export function Bar(
                         spacing={Dimensions.smallSpacing}
                     >
                         <box><SystemdUnitFailed/></box>
+                        <box><PrivacyIndicator wp={wp}/></box>
                         <box><SysTray tray={tray}/></box>
                         <box><SystemIndicators
                             notifd={notifd}
