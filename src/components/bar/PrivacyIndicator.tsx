@@ -1,5 +1,6 @@
 import {createBinding, createEffect, createState, With} from "ags"
 import {Gtk} from "ags/gtk4"
+import Gio from "gi://Gio"
 import AstalWp from "gi://AstalWp"
 import Geoclue from "gi://Geoclue?version=2.0"
 import {Log} from "../../lib/Logger";
@@ -35,8 +36,8 @@ export default function PrivacyIndicator({wp}: PrivacyIndicatorProps) {
     createEffect(() => {
         Log.d("PrivacyIndicator", "Creating GeoClue Manager proxy")
         Geoclue.ManagerProxy.new_for_bus(
-            1, // Gio.BusType.SYSTEM
-            0, // Gio.DBusProxyFlags.NONE
+            Gio.BusType.SYSTEM,
+            Gio.DBusProxyFlags.NONE,
             "org.freedesktop.GeoClue2",
             "/org/freedesktop/GeoClue2/Manager",
             null,
