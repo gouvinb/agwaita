@@ -1,0 +1,11 @@
+[package]
+name = "agw-lib-outcome"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+catalyser = { workspace = true }
+log = { workspace = true }

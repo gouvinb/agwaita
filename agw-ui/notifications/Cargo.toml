@@ -1,0 +1,26 @@
+[package]
+name = "agw-ui-notifications"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+agw-lib-outcome = { path = "../../agw-lib/outcome" }
+agw-service = { path = "../../agw-service" }
+
+# GTK/UI
+gtk4 = { workspace = true }
+relm4 = { workspace = true }
+relm4-components = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+
+# D-Bus
+zbus = { workspace = true }
+
+# Utilities
+catalyser = { workspace = true }
+log = { workspace = true }
+chrono = { workspace = true }
+tokio = { workspace = true }

@@ -1,0 +1,21 @@
+[package]
+name = "agw-ui-bluetooth-manager"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+agw-lib-outcome = { path = "../../agw-lib/outcome" }
+
+catalyser = { workspace = true }
+log = { workspace = true }
+relm4 = { workspace = true }
+gtk4 = { workspace = true }
+libadwaita = { workspace = true }
+zbus = { workspace = true }
+zvariant = { workspace = true }
+tokio = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }

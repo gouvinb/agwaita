@@ -1,0 +1,21 @@
+[package]
+name = "agw-ui-power-menu"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Internal
+agw-lib-outcome = { path = "../../agw-lib/outcome" }
+
+# GTK/UI
+gtk4 = { workspace = true }
+relm4 = { workspace = true }
+relm4-components = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+
+# Utilities
+catalyser = { workspace = true }
+log = { workspace = true }

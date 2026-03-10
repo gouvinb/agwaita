@@ -1,0 +1,27 @@
+[package]
+name = "agw-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+agw-lib-logger = { path = "../agw-lib/logger" }
+agw-lib-outcome = { path = "../agw-lib/outcome" }
+
+agw-service = { path = "../agw-service" }
+
+agw-ui-session = { path = "../agw-ui/session" }
+agw-ui-audio-manager = { path = "../agw-ui/audio-manager" }
+agw-ui-bluetooth-manager = { path = "../agw-ui/bluetooth-manager" }
+agw-ui-networkd-manager = { path = "../agw-ui/networkd-manager" }
+agw-ui-wallpaper = { path = "../agw-ui/wallpaper" }
+
+catalyser = { workspace = true }
+log = { workspace = true }
+clap = { workspace = true }
+
+[[bin]]
+name = "agwaita"
+path = "src/main.rs"
