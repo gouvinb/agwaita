@@ -1,0 +1,27 @@
+[package]
+name = "agw-service"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+log = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+niri-ipc = { workspace = true }
+futures = { workspace = true }
+inotify = { workspace = true }
+libpulse-binding = { workspace = true }
+pipewire = { workspace = true }
+libspa = { workspace = true }
+zbus = { workspace = true }
+zvariant = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+relm4 = { workspace = true }
+chrono = { workspace = true }
+calcard = { workspace = true }
+rrule = { workspace = true }
+gtk4 = { workspace = true }
+udev = { workspace = true }

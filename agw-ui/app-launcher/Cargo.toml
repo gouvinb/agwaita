@@ -1,0 +1,29 @@
+[package]
+name = "agw-ui-app-launcher"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Internal
+agw-lib-outcome = { path = "../../agw-lib/outcome" }
+agw-service = { path = "../../agw-service" }
+
+# GTK/UI
+gtk4 = { workspace = true }
+relm4 = { workspace = true }
+relm4-components = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+
+# Desktop entries
+freedesktop-desktop-entry = { workspace = true }
+
+# System
+inotify = { workspace = true }
+
+# Utilities
+catalyser = { workspace = true }
+log = { workspace = true }
+nucleo-matcher = { workspace = true }

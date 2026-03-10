@@ -1,0 +1,37 @@
+[package]
+name = "agw-ui-session"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+agw-lib-outcome = { path = "../../agw-lib/outcome" }
+agw-service = { path = "../../agw-service" }
+agw-ui-app-launcher = { path = "../app-launcher" }
+agw-ui-notifications = { path = "../notifications" }
+agw-ui-power-menu = { path = "../power-menu" }
+
+catalyser = { workspace = true }
+log = { workspace = true }
+signal-hook = { workspace = true }
+
+gtk4 = { workspace = true }
+relm4 = { workspace = true }
+relm4-components = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+
+zbus = { workspace = true }
+zvariant = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+chrono = { workspace = true }
+niri-ipc = { workspace = true }
+tokio = { workspace = true }
+inotify = { workspace = true }
+libpulse-binding = { workspace = true }
+rrule = { workspace = true }
+calcard = { workspace = true }

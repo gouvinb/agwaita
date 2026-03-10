@@ -29,14 +29,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS:
- - WM:
 
- - Version or commit ref: 
-
- - Ags version: 
- - Gnim version: 
- - Astal version: 
+- OS:
+- WM:
+- Rust version and toolchain:
 
 **Additional context**
 
