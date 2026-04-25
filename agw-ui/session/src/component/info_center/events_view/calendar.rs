@@ -5,6 +5,7 @@ use super::event_item::{
 use crate::system_state::global_service::GlobalSystemService;
 use agw_service::{
     calendar::types::CalendarEvent,
+    signal::SignalHandler,
     time::TimeUnit,
 };
 use catalyser::stdx::extension::str_extension::MultilineStr;
@@ -39,6 +40,7 @@ pub struct Calendar {
     locale: Locale,
     global_service: Arc<GlobalSystemService>,
     calendar_widget: gtk::Calendar, // Store widget reference to mark days
+    _day_handler: Option<SignalHandler>,
 }
 
 #[derive(Debug)]
@@ -198,6 +200,7 @@ impl SimpleComponent for Calendar {
             locale,
             global_service,
             calendar_widget: gtk::Calendar::new(), // Temporary, will be replaced
+            _day_handler: None,
         };
 
         let today_events_box = model.today_events.widget();
@@ -206,7 +209,7 @@ impl SimpleComponent for Calendar {
         let widgets = view_output!();
 
         // Replace with actual widget reference
-        let model = Calendar {
+        let mut model = Calendar {
             calendar_widget: widgets.calendar_widget.clone(),
             ..model
         };
@@ -228,14 +231,17 @@ impl SimpleComponent for Calendar {
             }
         });
 
-        // Subscribe to day changes (midnight rollover)
+        // Subscribe to day changes (midnight rollover).
+        // Store the handler in the model so it's disconnected when this component is dropped.
         let day_sender = sender.clone();
-        let _day_handler = model
-            .global_service
-            .time_service()
-            .subscribe(TimeUnit::Day, move |_| {
-                day_sender.input(CalendarInput::DayChanged);
-            });
+        model._day_handler = Some(
+            model
+                .global_service
+                .time_service()
+                .subscribe(TimeUnit::Day, move |_| {
+                    day_sender.input(CalendarInput::DayChanged);
+                }),
+        );
 
         ComponentParts { model, widgets }
     }

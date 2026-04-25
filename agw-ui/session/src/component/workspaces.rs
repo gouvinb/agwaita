@@ -1,6 +1,9 @@
-use agw_service::wm::{
-    WMService,
-    WorkspaceInfo,
+use agw_service::{
+    signal::SignalHandler,
+    wm::{
+        WMService,
+        WorkspaceInfo,
+    },
 };
 use catalyser::stdx::extension::str_extension::MultilineStr;
 use gtk4::prelude::*;
@@ -23,6 +26,7 @@ pub struct Workspaces {
     workspaces: Vec<WorkspaceInfo>,
     wm_service: Arc<WMService>,
     container: gtk::Box,
+    _wm_handler: SignalHandler,
 }
 
 #[derive(Debug)]
@@ -53,11 +57,52 @@ impl SimpleComponent for Workspaces {
             output_name
         );
 
+        // Connect to workspace changes signal before starting monitoring.
+        // The handler must be stored in the model — if left as a local in an async block,
+        // the compiler may drop it before the first await, disconnecting the signal immediately.
+        let sender_clone = sender.clone();
+        let output_filter = output_name.clone();
+        let wm_handler = wm_service.connect_workspaces_changed(move |workspaces| {
+            debug!(
+                "Workspaces updated: {} workspaces (before filter)",
+                workspaces.len()
+            );
+
+            let filtered: Vec<_> = workspaces
+                .into_iter()
+                .filter(|ws| {
+                    if let Some(ref filter) = output_filter {
+                        ws.output_name.as_deref() == Some(filter.as_str())
+                    } else {
+                        true
+                    }
+                })
+                .collect();
+
+            debug!(
+                "Workspaces after filter for {:?}: {} workspaces",
+                output_filter,
+                filtered.len()
+            );
+
+            let sender_for_idle = sender_clone.clone();
+            gtk4::glib::idle_add_once(move || {
+                if sender_for_idle
+                    .input_sender()
+                    .send(WorkspacesInput::UpdateWorkspaces(filtered))
+                    .is_err()
+                {
+                    debug!("Component was dropped, ignoring workspace update");
+                }
+            });
+        });
+
         let model = Workspaces {
             output_name: output_name.clone(),
             workspaces: Vec::new(),
             wm_service: wm_service.clone(),
             container: root.clone(),
+            _wm_handler: wm_handler,
         };
 
         let widgets = view_output!();
@@ -73,52 +118,10 @@ impl SimpleComponent for Workspaces {
             }
         });
 
-        let sender_clone = sender.clone();
-        let output_clone = output_name.clone();
+        // Start monitoring in the background (connect_workspaces_changed already done above)
         let wm_clone = wm_service.clone();
-
-        // Spawn async task to setup workspace monitoring
+        let output_clone = output_name.clone();
         gtk4::glib::spawn_future_local(async move {
-            // Connect to workspace changes signal
-            let output_filter = output_clone.clone();
-            let _handler = wm_clone.connect_workspaces_changed(move |workspaces| {
-                debug!(
-                    "Workspaces updated: {} workspaces (before filter)",
-                    workspaces.len()
-                );
-
-                // Filter workspaces by output (each component filters locally)
-                let filtered: Vec<_> = workspaces
-                    .into_iter()
-                    .filter(|ws| {
-                        if let Some(ref filter) = output_filter {
-                            ws.output_name.as_deref() == Some(filter.as_str())
-                        } else {
-                            true
-                        }
-                    })
-                    .collect();
-
-                debug!(
-                    "Workspaces after filter for {:?}: {} workspaces",
-                    output_filter,
-                    filtered.len()
-                );
-
-                // Use glib to send message to GTK thread
-                let sender_for_idle = sender_clone.clone();
-                gtk4::glib::idle_add_once(move || {
-                    if sender_for_idle
-                        .input_sender()
-                        .send(WorkspacesInput::UpdateWorkspaces(filtered))
-                        .is_err()
-                    {
-                        debug!("Component was dropped, ignoring workspace update");
-                    }
-                });
-            });
-
-            // Start monitoring
             wm_clone.start_monitoring(output_clone).await;
         });
 

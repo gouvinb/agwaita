@@ -1,5 +1,8 @@
 use crate::system_state::global_service::GlobalSystemService;
-use agw_service::time::TimeUnit;
+use agw_service::{
+    signal::SignalHandler,
+    time::TimeUnit,
+};
 use chrono::{
     Local,
     Locale,
@@ -36,6 +39,7 @@ pub struct InfoCenter {
 
     notifications: Controller<Notifications>,
     calendar: Controller<Calendar>,
+    _time_handler: SignalHandler,
 }
 
 #[derive(Debug)]
@@ -100,10 +104,20 @@ impl SimpleComponent for InfoCenter {
         let notifications = Notifications::builder().launch(notification_store).detach();
         let calendar = Calendar::builder().launch(global_service.clone()).detach();
 
+        // Subscribe to time changes (second precision)
+        let time_sender = sender.input_sender().clone();
+        let time_handler = global_service
+            .time_service()
+            .subscribe(TimeUnit::Second, move |_| {
+                // Use send() instead of input() to avoid panic when component is dropped
+                let _ = time_sender.send(InfoCenterInput::UpdateTime);
+            });
+
         let model = InfoCenter {
             current_time: Self::format_time(),
             notifications,
             calendar,
+            _time_handler: time_handler,
         };
         let widgets = view_output!();
 
@@ -112,15 +126,6 @@ impl SimpleComponent for InfoCenter {
         widgets.popover_widget.connect_closed(move |_| {
             popover_sender.send(InfoCenterInput::PopoverClosed).ok();
         });
-
-        // Subscribe to time changes (second precision)
-        let time_sender = sender.input_sender().clone();
-        let _time_handler = global_service
-            .time_service()
-            .subscribe(TimeUnit::Second, move |_| {
-                // Use send() instead of input() to avoid panic when component is dropped
-                let _ = time_sender.send(InfoCenterInput::UpdateTime);
-            });
 
         ComponentParts { model, widgets }
     }

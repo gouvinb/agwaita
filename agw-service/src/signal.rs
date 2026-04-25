@@ -6,6 +6,7 @@
 
 use std::{
     collections::HashMap,
+    fmt,
     sync::{
         Arc,
         Mutex,
@@ -18,10 +19,24 @@ use std::{
 
 /// Handle returned when connecting to a signal
 ///
-/// Used to disconnect from a signal when the handle is dropped or explicitly disconnected.
-#[derive(Debug, Clone)]
+/// Automatically disconnects from the signal when dropped (RAII).
 pub struct SignalHandler {
     pub(crate) id: u64,
+    disconnect: Arc<dyn Fn(u64) + Send + Sync>,
+}
+
+impl fmt::Debug for SignalHandler {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SignalHandler")
+            .field("id", &self.id)
+            .finish()
+    }
+}
+
+impl Drop for SignalHandler {
+    fn drop(&mut self) {
+        (self.disconnect)(self.id);
+    }
 }
 
 /// Generic signal that can emit events to multiple connected handlers
@@ -69,11 +84,23 @@ impl<T: Clone + Send> Signal<T> {
     /// A `SignalHandler` that can be used to disconnect the callback
     pub fn connect<F>(&self, callback: F) -> SignalHandler
     where
+        T: 'static,
         F: Fn(T) + Send + 'static,
     {
         let id = self.next_id.fetch_add(1, Ordering::SeqCst);
-        self.handlers.lock().unwrap().insert(id, Box::new(callback));
-        SignalHandler { id }
+        self.handlers
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(id, Box::new(callback));
+        let handlers = Arc::clone(&self.handlers);
+        SignalHandler {
+            id,
+            disconnect: Arc::new(move |id| {
+                if let Ok(mut h) = handlers.lock() {
+                    h.remove(&id);
+                }
+            }),
+        }
     }
 
     /// Emit the signal with a value
@@ -85,7 +112,7 @@ impl<T: Clone + Send> Signal<T> {
     /// * `value` - The value to pass to all connected callbacks
     pub async fn emit(&self, value: T) {
         // Call callbacks synchronously - if async needed, the callback can spawn its own task
-        let handlers_lock = self.handlers.lock().unwrap();
+        let handlers_lock = self.handlers.lock().unwrap_or_else(|e| e.into_inner());
         for callback in handlers_lock.values() {
             let v = value.clone();
             callback(v);
@@ -99,7 +126,7 @@ impl<T: Clone + Send> Signal<T> {
     /// # Arguments
     /// * `value` - The value to pass to all connected callbacks
     pub fn emit_sync(&self, value: T) {
-        let handlers_lock = self.handlers.lock().unwrap();
+        let handlers_lock = self.handlers.lock().unwrap_or_else(|e| e.into_inner());
         for callback in handlers_lock.values() {
             let v = value.clone();
             callback(v);
@@ -111,12 +138,17 @@ impl<T: Clone + Send> Signal<T> {
     /// # Arguments
     /// * `handler` - The handler returned from `connect()`
     pub fn disconnect(&self, handler: SignalHandler) {
-        self.handlers.lock().unwrap().remove(&handler.id);
+        if let Ok(mut h) = self.handlers.lock() {
+            h.remove(&handler.id);
+        }
     }
 
     /// Get the number of connected handlers
     pub fn handler_count(&self) -> usize {
-        self.handlers.lock().unwrap().len()
+        self.handlers
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .len()
     }
 }
 
