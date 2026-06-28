@@ -289,22 +289,22 @@ impl AudioService {
                         let mut data = data.lock().unwrap();
                         data.sinks = sinks.borrow().clone();
 
-                        if let Some(default_name) = &data.default_sink_name {
-                            if let Some(sink) = data.sinks.iter().find(|s| &s.name == default_name) {
-                                let volume = sink.volume.avg().0 as f64 / NORMAL;
-                                let muted = sink.is_mute;
+                        if let Some(default_name) = &data.default_sink_name
+                            && let Some(sink) = data.sinks.iter().find(|s| &s.name == default_name)
+                        {
+                            let volume = sink.volume.avg().0 as f64 / NORMAL;
+                            let muted = sink.is_mute;
 
-                                data.current_volume = volume;
-                                data.current_muted = muted;
+                            data.current_volume = volume;
+                            data.current_muted = muted;
 
-                                debug!("Updated: volume={:.2}, muted={}", volume, muted);
+                            debug!("Updated: volume={:.2}, muted={}", volume, muted);
 
-                                // Release lock before callbacks
-                                drop(data);
-                                let callbacks = callbacks.lock().unwrap();
-                                for callback in callbacks.iter() {
-                                    callback(volume, muted);
-                                }
+                            // Release lock before callbacks
+                            drop(data);
+                            let callbacks = callbacks.lock().unwrap();
+                            for callback in callbacks.iter() {
+                                callback(volume, muted);
                             }
                         }
                     },
@@ -355,11 +355,11 @@ impl AudioService {
         let data = self.data.lock().unwrap();
         let new_muted = !data.current_muted;
 
-        if let Some(sink_name) = &data.default_sink_name {
-            if let Some(tx) = &self.commander_tx {
-                let _ = tx.send(AudioCommand::SetMute(sink_name.clone(), new_muted));
-                debug!("Toggle mute: {}", new_muted);
-            }
+        if let Some(sink_name) = &data.default_sink_name
+            && let Some(tx) = &self.commander_tx
+        {
+            let _ = tx.send(AudioCommand::SetMute(sink_name.clone(), new_muted));
+            debug!("Toggle mute: {}", new_muted);
         }
     }
 
@@ -384,6 +384,12 @@ impl AudioService {
         self.on_change(callback);
 
         AudioMonitor
+    }
+}
+
+impl Default for AudioService {
+    fn default() -> Self {
+        AudioService::new()
     }
 }
 

@@ -243,11 +243,12 @@ impl GlobalSystemService {
 
         debug!("New subscriber registered");
 
-        // Send current state immediately to the new subscriber
-        self.send_initial_state(&sender);
+        // Must be added before send_initial_state so the async battery task's
+        // broadcast (setup_battery_monitor) can reach this sender if it fires
+        // while send_initial_state is still running.
+        self.subscribers.lock().unwrap().push(sender.clone());
 
-        // Add to subscribers list for future updates
-        self.subscribers.lock().unwrap().push(sender);
+        self.send_initial_state(&sender);
 
         receiver
     }
