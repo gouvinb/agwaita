@@ -36,6 +36,7 @@ use std::{
         },
     },
     thread,
+    time::Duration,
 };
 use tokio::sync::RwLock;
 
@@ -206,69 +207,75 @@ impl WMServiceTrait for NiriWMService {
                         workspaces: Vec<Workspace>,
                     ) {
                         let converted = NiriWMService::convert_workspaces(workspaces, None);
-
                         *workspaces_cache.write().await = converted.clone();
-
                         signal.emit_sync(converted);
                     }
 
-                    let socket = Socket::connect();
-
-                    if let Err(e) = socket {
-                        error!("Failed to connect to Niri socket: {}", e);
-                        return;
-                    }
-
-                    let mut event_sock = socket.unwrap();
-
-                    debug!("Niri event socket connected for workspace monitoring");
-
-                    let req = event_sock.send(Request::EventStream);
-
-                    if let Err(e) = req {
-                        error!("Failed to send EventStream request: {}", e);
-                        return;
-                    }
-
-                    if let Ok(Err(e)) = req {
-                        error!("Niri rejected EventStream subscription: {}", e);
-                        return;
-                    }
-
-                    let mut read_event = event_sock.read_events();
-
+                    // Outer reconnection loop: if the socket drops (sleep/wake, niri restart),
+                    // reconnect automatically instead of leaving monitoring dead.
                     loop {
-                        match read_event() {
-                            Ok(Event::WorkspacesChanged { workspaces }) => {
-                                debug!("WorkspacesChanged event received");
-
-                                emit_workspaces(&signal, &workspaces_cache, workspaces).await;
-                            },
-                            Ok(Event::WorkspaceActivated { id, focused }) => {
-                                debug!("WorkspaceActivated event: id={}, focused={}", id, focused);
-                                if let Ok(mut query_sock) = Socket::connect() {
-                                    if let Ok(Ok(Response::Workspaces(workspaces))) = query_sock.send(Request::Workspaces) {
-                                        emit_workspaces(&signal, &workspaces_cache, workspaces).await;
-                                    }
-                                }
-                            },
-                            Ok(Event::WorkspaceActiveWindowChanged { workspace_id, .. }) => {
-                                debug!(
-                                    "WorkspaceActiveWindowChanged event: workspace_id={}",
-                                    workspace_id
-                                );
-                                if let Ok(mut query_sock) = Socket::connect() {
-                                    if let Ok(Ok(Response::Workspaces(workspaces))) = query_sock.send(Request::Workspaces) {
-                                        emit_workspaces(&signal, &workspaces_cache, workspaces).await;
-                                    }
-                                }
-                            },
-                            Ok(_) => {},
+                        let mut event_sock = match Socket::connect() {
+                            Ok(s) => s,
                             Err(e) => {
-                                error!("Niri event stream error: {}", e);
-                                break;
+                                error!("Failed to connect to Niri socket: {}", e);
+                                tokio::time::sleep(Duration::from_secs(5)).await;
+                                continue;
                             },
+                        };
+
+                        debug!("Niri event socket connected for workspace monitoring");
+
+                        match event_sock.send(Request::EventStream) {
+                            Err(e) => {
+                                error!("Failed to send EventStream request: {}", e);
+                                tokio::time::sleep(Duration::from_secs(5)).await;
+                                continue;
+                            },
+                            Ok(Err(e)) => {
+                                error!("Niri rejected EventStream subscription: {}", e);
+                                tokio::time::sleep(Duration::from_secs(5)).await;
+                                continue;
+                            },
+                            Ok(Ok(_)) => {},
                         }
+
+                        let mut read_event = event_sock.read_events();
+
+                        loop {
+                            match read_event() {
+                                Ok(Event::WorkspacesChanged { workspaces }) => {
+                                    debug!("WorkspacesChanged event received");
+                                    emit_workspaces(&signal, &workspaces_cache, workspaces).await;
+                                },
+                                Ok(Event::WorkspaceActivated { id, focused }) => {
+                                    debug!("WorkspaceActivated event: id={}, focused={}", id, focused);
+                                    if let Ok(mut query_sock) = Socket::connect() {
+                                        if let Ok(Ok(Response::Workspaces(workspaces))) = query_sock.send(Request::Workspaces) {
+                                            emit_workspaces(&signal, &workspaces_cache, workspaces).await;
+                                        }
+                                    }
+                                },
+                                Ok(Event::WorkspaceActiveWindowChanged { workspace_id, .. }) => {
+                                    debug!(
+                                        "WorkspaceActiveWindowChanged event: workspace_id={}",
+                                        workspace_id
+                                    );
+                                    if let Ok(mut query_sock) = Socket::connect() {
+                                        if let Ok(Ok(Response::Workspaces(workspaces))) = query_sock.send(Request::Workspaces) {
+                                            emit_workspaces(&signal, &workspaces_cache, workspaces).await;
+                                        }
+                                    }
+                                },
+                                Ok(_) => {},
+                                Err(e) => {
+                                    error!("Niri event stream disconnected: {}", e);
+                                    break; // break inner loop → reconnect via outer loop
+                                },
+                            }
+                        }
+
+                        debug!("Niri event stream lost, reconnecting in 5s...");
+                        tokio::time::sleep(Duration::from_secs(5)).await;
                     }
                 });
             });
