@@ -4,9 +4,12 @@
 //! converting signal-based notifications to message-passing for GTK/Relm4 integration.
 
 use super::messages::SystemStateUpdate;
-use agw_service::privacy::{
-    PrivacyService,
-    PrivacyUsage,
+use agw_service::{
+    privacy::{
+        PrivacyService,
+        PrivacyUsage,
+    },
+    signal::SignalHandler,
 };
 use log::debug;
 use std::sync::mpsc::Sender;
@@ -14,6 +17,7 @@ use std::sync::mpsc::Sender;
 /// Adapter for integrating PrivacyService with the UI message system
 pub struct PrivacyServiceAdapter {
     _service: PrivacyService,
+    _signal_handler: SignalHandler,
 }
 
 impl PrivacyServiceAdapter {
@@ -25,7 +29,7 @@ impl PrivacyServiceAdapter {
     pub fn new(service: PrivacyService, sender: Sender<SystemStateUpdate>) -> Self {
         let service_clone = service.clone();
 
-        service_clone.connect_usage_changed(move |usage: PrivacyUsage| {
+        let signal_handler = service_clone.connect_usage_changed(move |usage: PrivacyUsage| {
             debug!(
                 "Privacy usage changed - camera: {}, mic: {}, location: {}, screencast: {}",
                 usage.camera.len(),
@@ -38,6 +42,9 @@ impl PrivacyServiceAdapter {
 
         service.start_monitoring();
 
-        Self { _service: service }
+        Self {
+            _service: service,
+            _signal_handler: signal_handler,
+        }
     }
 }
