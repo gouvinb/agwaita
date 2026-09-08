@@ -298,6 +298,7 @@ AGENTS.md
 GEMINI.md
 WARP.md
 CRUSH.md
+.agents/
 .warp/
 .crush/
 .codeium/
