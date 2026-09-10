@@ -349,3 +349,4 @@ cline.json
 
 # Jetbrains Ai
 .aiassistant/
+.ai/
