@@ -14,8 +14,6 @@ log = { workspace = true }
 relm4 = { workspace = true }
 gtk4 = { workspace = true }
 libadwaita = { workspace = true }
-zbus = { workspace = true }
-zvariant = { workspace = true }
 tokio = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true }
