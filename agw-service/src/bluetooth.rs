@@ -1,15 +1,15 @@
-//! Bluetooth monitoring via BlueZ (D-Bus).
+//! Bluetooth monitoring via BlueZ (bluer).
 
-use crate::{
-    dbus_const::{
-        DBUS_INTERFACE,
-        DBUS_OBJECT_MANAGER_INTERFACE,
-        DBUS_PATH,
-        DBUS_PROPERTIES_CHANGED_MEMBER,
-        DBUS_PROPERTIES_INTERFACE,
-    },
-    runtime,
+use crate::runtime;
+use bluer::{
+    Adapter,
+    AdapterEvent,
+    Address,
+    Device,
+    DeviceEvent,
+    Session,
 };
+use futures::Stream;
 use log::{
     debug,
     error,
@@ -17,20 +17,48 @@ use log::{
     warn,
 };
 use std::{
-    collections::HashMap,
+    fmt::{
+        Display,
+        Formatter,
+    },
+    pin::Pin,
     sync::{
         Arc,
         Mutex,
     },
 };
-use zbus::{
-    Connection,
-    zvariant::{
-        OwnedObjectPath,
-        OwnedValue,
-        Value,
-    },
+use tokio_stream::{
+    StreamExt,
+    StreamMap,
 };
+
+/// Errors that can occur while interacting with the Bluetooth adapter or its devices.
+#[derive(Debug)]
+pub enum BluetoothError {
+    Bluer(bluer::Error),
+}
+
+impl Display for BluetoothError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Bluer(e) => write!(f, "bluetooth adapter error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for BluetoothError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Bluer(e) => Some(e),
+        }
+    }
+}
+
+impl From<bluer::Error> for BluetoothError {
+    fn from(error: bluer::Error) -> Self {
+        Self::Bluer(error)
+    }
+}
 
 /// BluetoothService - Manages bluetooth adapter and device monitoring via BlueZ.
 pub struct BluetoothService {
@@ -52,9 +80,6 @@ pub struct BluetoothDevice {
 }
 
 impl BluetoothService {
-    const BLUEZ_INTERFACE: &str = "org.bluez";
-    const BLUEZ_FIRST_CONTROLER_PATH: &str = "/org/bluez/hci0";
-
     pub fn new() -> Self {
         let service = Self {
             adapter_powered: Arc::new(Mutex::new(false)),
@@ -91,22 +116,11 @@ impl BluetoothService {
 
     /// Set adapter power state.
     #[allow(dead_code)] // Will be used in the future with bluetooth-manager
-    pub fn set_powered(&self, powered: bool) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn set_powered(&self, powered: bool) -> Result<(), BluetoothError> {
         runtime::runtime().block_on(async {
-            let connection = Connection::system().await?;
-
-            let proxy = zbus::Proxy::new(
-                &connection,
-                Self::BLUEZ_INTERFACE,
-                Self::BLUEZ_FIRST_CONTROLER_PATH,
-                DBUS_PROPERTIES_INTERFACE,
-            )
-            .await?;
-
-            let value = Value::new(powered);
-            proxy
-                .call::<_, _, ()>("Set", &(Self::buez_adapter_interface(1), "Powered", value))
-                .await?;
+            let session = Session::new().await?;
+            let adapter = session.default_adapter().await?;
+            adapter.set_powered(powered).await?;
 
             info!("Bluetooth adapter powered: {}", powered);
             *self.adapter_powered.lock().unwrap() = powered;
@@ -124,7 +138,8 @@ impl BluetoothService {
         }
     }
 
-    /// Start monitoring bluetooth state changes via D-Bus signals (event-based, no polling).
+    /// Start monitoring bluetooth state changes via the adapter and per-device event streams
+    /// (event-based, no polling).
     pub fn start_dbus_monitor<F>(&self, callback: F)
     where
         F: Fn(bool, u8) + Send + 'static,
@@ -133,87 +148,88 @@ impl BluetoothService {
 
         std::thread::spawn(move || {
             runtime::runtime().block_on(async move {
-                use futures::StreamExt;
-
-                match Connection::system().await {
-                    Ok(connection) => {
-                        info!("Bluetooth D-Bus monitor connected");
-
-                        let match_rule_str = format!(
-                            "type='signal',sender='{sender}',interface='{interface}',member='{member}'",
-                            sender = Self::BLUEZ_INTERFACE,
-                            interface = DBUS_PROPERTIES_INTERFACE,
-                            member = DBUS_PROPERTIES_CHANGED_MEMBER
-                        );
-
-                        if let Err(e) = connection
-                            .call_method(
-                                Some(DBUS_INTERFACE),
-                                DBUS_PATH,
-                                Some(DBUS_INTERFACE),
-                                "AddMatch",
-                                &(match_rule_str),
-                            )
-                            .await
-                        {
-                            error!("Failed to subscribe to BlueZ signals: {}", e);
-                            return;
-                        }
-
-                        debug!("Subscribed to BlueZ PropertiesChanged signals");
-
-                        let mut stream = zbus::MessageStream::from(&connection);
-
-                        while let Some(msg) = stream.next().await {
-                            if let Ok(msg) = msg {
-                                let header = msg.header();
-
-                                if let (Some(path), Some(interface), Some(member)) = (header.path(), header.interface(), header.member()) {
-                                    let path_str = path.as_str();
-                                    let interface_str = interface.as_str();
-                                    let member_str = member.as_str();
-
-                                    if interface_str == DBUS_PROPERTIES_INTERFACE
-                                        && member_str == DBUS_PROPERTIES_CHANGED_MEMBER
-                                        && (path_str.starts_with("/org/bluez/hci0/dev_") || path_str == Self::BLUEZ_FIRST_CONTROLER_PATH)
-                                    {
-                                        if let Ok((interface_name, changed_properties, _)) = msg
-                                            .body()
-                                            .deserialize::<(String, HashMap<String, OwnedValue>, Vec<String>)>()
-                                        {
-                                            let is_relevant = (interface_name == "org.bluez.Device1" && changed_properties.contains_key("Connected"))
-                                                || (interface_name == "org.bluez.Adapter1" && changed_properties.contains_key("Powered"));
-
-                                            if is_relevant {
-                                                debug!("Bluetooth state change detected on {}", path_str);
-
-                                                if let Err(e) = service.refresh_state_async().await {
-                                                    warn!("Failed to refresh bluetooth state: {}", e);
-                                                    continue;
-                                                }
-
-                                                let powered = service.get_powered();
-                                                let connected_count = service.get_connected_count();
-
-                                                callback(powered, connected_count);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        info!("Bluetooth D-Bus monitor stream ended");
-                    },
+                let adapter = match Self::connect_adapter().await {
+                    Ok(adapter) => adapter,
                     Err(e) => {
                         error!(
-                            "Failed to connect to system bus for bluetooth monitoring: {}",
+                            "Failed to connect to bluetooth adapter for monitoring: {}",
                             e
                         );
+                        return;
                     },
+                };
+
+                // discover_devices() also drives the discovery session (Partie 2), so scanning
+                // for new devices keeps working while we track known ones below.
+                let mut adapter_events = match adapter.discover_devices().await {
+                    Ok(events) => events,
+                    Err(e) => {
+                        error!("Failed to start bluetooth discovery: {}", e);
+                        return;
+                    },
+                };
+
+                info!("Bluetooth adapter monitor connected");
+
+                // Keyed by address so a removed device's event stream is dropped automatically,
+                // avoiding leaked tasks or dangling subscriptions.
+                let mut device_events: StreamMap<Address, Pin<Box<dyn Stream<Item = DeviceEvent> + Send>>> = StreamMap::new();
+
+                loop {
+                    tokio::select! {
+                        event = adapter_events.next() => {
+                            let Some(event) = event else { break; };
+                            debug!("Bluetooth adapter event: {:?}", event);
+                            Self::handle_adapter_event(&adapter, event, &mut device_events).await;
+                        },
+                        Some((address, event)) = device_events.next(), if !device_events.is_empty() => {
+                            debug!("Bluetooth device {} event: {:?}", address, event);
+                        },
+                    }
+
+                    if let Err(e) = service.refresh_state_async().await {
+                        warn!("Failed to refresh bluetooth state: {}", e);
+                        continue;
+                    }
+
+                    callback(service.get_powered(), service.get_connected_count());
                 }
+
+                info!("Bluetooth adapter monitor stream ended");
             });
         });
+    }
+
+    async fn handle_adapter_event(
+        adapter: &Adapter,
+        event: AdapterEvent,
+        device_events: &mut StreamMap<Address, Pin<Box<dyn Stream<Item = DeviceEvent> + Send>>>,
+    ) {
+        match event {
+            AdapterEvent::DeviceAdded(address) => Self::track_device(adapter, address, device_events).await,
+            AdapterEvent::DeviceRemoved(address) => {
+                device_events.remove(&address);
+            },
+            AdapterEvent::PropertyChanged(_) => {},
+        }
+    }
+
+    async fn track_device(adapter: &Adapter, address: Address, device_events: &mut StreamMap<Address, Pin<Box<dyn Stream<Item = DeviceEvent> + Send>>>) {
+        let Ok(device) = adapter.device(address) else {
+            return;
+        };
+
+        match device.events().await {
+            Ok(events) => {
+                device_events.insert(address, Box::pin(events));
+            },
+            Err(e) => {
+                warn!(
+                    "Failed to subscribe to events for device {}: {}",
+                    address, e
+                );
+            },
+        }
     }
 
     /// Create a monitor that checks for bluetooth state changes.
@@ -230,7 +246,7 @@ impl BluetoothService {
         }
     }
 
-    fn refresh_state(&self) -> Result<(), Box<dyn std::error::Error>> {
+    fn refresh_state(&self) -> Result<(), BluetoothError> {
         runtime::runtime().block_on(async {
             match self.refresh_state_async().await {
                 Ok(_) => {
@@ -245,10 +261,10 @@ impl BluetoothService {
         })
     }
 
-    pub(crate) async fn refresh_state_async(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let connection = Connection::system().await?;
+    pub(crate) async fn refresh_state_async(&self) -> Result<(), BluetoothError> {
+        let adapter = Self::connect_adapter().await?;
 
-        match self.get_adapter_powered(&connection).await {
+        match adapter.is_powered().await {
             Ok(powered) => {
                 *self.adapter_powered.lock().unwrap() = powered;
                 debug!("Adapter powered: {}", powered);
@@ -258,7 +274,7 @@ impl BluetoothService {
             },
         }
 
-        match self.get_device_list(&connection).await {
+        match Self::get_device_list(&adapter).await {
             Ok(devices) => {
                 *self.connected_devices.lock().unwrap() = devices;
                 debug!(
@@ -274,91 +290,38 @@ impl BluetoothService {
         Ok(())
     }
 
-    fn buez_adapter_interface(id: u8) -> String {
-        format!("org.bluez.Adapter{}", id)
+    async fn connect_adapter() -> Result<Adapter, BluetoothError> {
+        let session = Session::new().await?;
+        let adapter = session.default_adapter().await?;
+        Ok(adapter)
     }
 
-    async fn get_adapter_powered(&self, connection: &Connection) -> Result<bool, Box<dyn std::error::Error>> {
-        let proxy = zbus::Proxy::new(
-            connection,
-            Self::BLUEZ_INTERFACE,
-            Self::BLUEZ_FIRST_CONTROLER_PATH,
-            DBUS_PROPERTIES_INTERFACE,
-        )
-        .await?;
+    async fn get_device_list(adapter: &Adapter) -> Result<Vec<BluetoothDevice>, BluetoothError> {
+        let addresses = adapter.device_addresses().await?;
+        let mut devices = Vec::with_capacity(addresses.len());
 
-        let variant: OwnedValue = proxy
-            .call("Get", &("org.bluez.Adapter1", "Powered"))
-            .await?;
-
-        let powered = match variant.downcast_ref::<Value>() {
-            Ok(Value::Bool(b)) => b,
-            _ => bool::try_from(&variant).unwrap_or(false),
-        };
-
-        Ok(powered)
-    }
-
-    async fn get_device_list(&self, connection: &Connection) -> Result<Vec<BluetoothDevice>, Box<dyn std::error::Error>> {
-        let proxy = zbus::Proxy::new(
-            connection,
-            Self::BLUEZ_INTERFACE,
-            "/",
-            DBUS_OBJECT_MANAGER_INTERFACE,
-        )
-        .await?;
-
-        let managed_objects: HashMap<OwnedObjectPath, HashMap<String, HashMap<String, OwnedValue>>> = proxy.call("GetManagedObjects", &()).await?;
-
-        let mut devices = Vec::new();
-
-        for (path, interfaces) in managed_objects {
-            if let Some(device_props) = interfaces.get("org.bluez.Device1") {
-                if let Some(device) = self.parse_device(path.as_str(), device_props) {
-                    devices.push(device);
-                }
+        for address in addresses {
+            let device = adapter.device(address)?;
+            if let Some(device) = Self::parse_device(&device).await {
+                devices.push(device);
             }
         }
 
         Ok(devices)
     }
 
-    fn parse_device(&self, path: &str, props: &HashMap<String, OwnedValue>) -> Option<BluetoothDevice> {
-        let address = props
-            .get("Address")
-            .and_then(|v| <&str>::try_from(v).ok())
-            .map(|s| s.to_string())
-            .unwrap_or_default();
+    async fn parse_device(device: &Device) -> Option<BluetoothDevice> {
+        let address = device.address().to_string();
 
-        let alias = props
-            .get("Alias")
-            .and_then(|v| <&str>::try_from(v).ok())
-            .map(|s| s.to_string())
-            .unwrap_or_else(|| address.clone());
-
-        let connected = props
-            .get("Connected")
-            .and_then(|v| bool::try_from(v).ok())
-            .unwrap_or(false);
-
-        let paired = props
-            .get("Paired")
-            .and_then(|v| bool::try_from(v).ok())
-            .unwrap_or(false);
-
-        let trusted = props
-            .get("Trusted")
-            .and_then(|v| bool::try_from(v).ok())
-            .unwrap_or(false);
-
-        let battery_percentage = props
-            .get("BatteryPercentage")
-            .and_then(|v| u8::try_from(v).ok());
-
-        let rssi = props.get("RSSI").and_then(|v| i16::try_from(v).ok());
+        let alias = device.alias().await.unwrap_or_else(|_| address.clone());
+        let connected = device.is_connected().await.unwrap_or(false);
+        let paired = device.is_paired().await.unwrap_or(false);
+        let trusted = device.is_trusted().await.unwrap_or(false);
+        let battery_percentage = device.battery_percentage().await.ok().flatten();
+        let rssi = device.rssi().await.ok().flatten();
 
         Some(BluetoothDevice {
-            path: path.to_string(),
+            path: Self::device_dbus_path(device.adapter_name(), &address),
             address,
             alias,
             connected,
@@ -367,6 +330,16 @@ impl BluetoothService {
             battery_percentage,
             rssi,
         })
+    }
+
+    // bluer keeps the BlueZ object path private; consumers relying on `path` still get the
+    // canonical BlueZ layout, reconstructed from the adapter name and device address.
+    fn device_dbus_path(adapter_name: &str, address: &str) -> String {
+        format!(
+            "/org/bluez/{}/dev_{}",
+            adapter_name,
+            address.replace(':', "_")
+        )
     }
 
     fn clone_service(&self) -> Self {

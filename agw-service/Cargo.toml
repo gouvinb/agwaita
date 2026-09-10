@@ -25,3 +25,5 @@ calcard = { workspace = true }
 rrule = { workspace = true }
 gtk4 = { workspace = true }
 udev = { workspace = true }
+bluer.workspace = true
+tokio-stream.workspace = true
