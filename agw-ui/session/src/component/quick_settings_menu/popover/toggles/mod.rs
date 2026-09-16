@@ -666,18 +666,9 @@ impl SimpleComponent for ToggleButtons {
         // Connect bluetooth button signal
         let output_sender = sender.output_sender().clone();
         widgets.bluetooth_button.connect_clicked(move |_| {
-            // Launch bluetoothctl
-            Command::new("niri")
-                .args(&[
-                    "msg",
-                    "-j",
-                    "action",
-                    "spawn-sh",
-                    "--",
-                    "/usr/bin/ghostty --gtk-single-instance=true -e bluetoothctl",
-                ])
-                .output()
-                .ok();
+            if let Err(e) = Command::new("agwaita").arg("bluetooth-manager").spawn() {
+                log::error!("Failed to launch bluetooth-manager: {}", e);
+            }
             // Request popover to close
             output_sender.send(ToggleButtonsOutput::ClosePopover).ok();
         });
