@@ -54,7 +54,11 @@ pub enum CliAction {
 
     /// Open the Bluetooth device manager
     #[command(name = "bluetooth-manager", alias = "bluetooth")]
-    BluetoothManager,
+    BluetoothManager {
+        /// Force the scan state for this session (true to start scanning, false to prevent it)
+        #[arg(long)]
+        scan: Option<bool>,
+    },
 
     /// Manage network connections
     #[command(name = "networkd-manager")]
@@ -93,7 +97,7 @@ impl CommandRun for CliAction {
                 send_daemon_command(message)
             },
             CliAction::AudioManager => agw_ui_audio_manager::init(),
-            CliAction::BluetoothManager => agw_ui_bluetooth_manager::init(),
+            CliAction::BluetoothManager { scan } => agw_ui_bluetooth_manager::init(*scan),
             CliAction::NetworkdManager => agw_ui_networkd_manager::init(),
             CliAction::WallpaperManager => agw_ui_wallpaper::init(),
         }

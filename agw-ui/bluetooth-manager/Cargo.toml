@@ -8,12 +8,18 @@ repository.workspace = true
 
 [dependencies]
 agw-lib-outcome = { path = "../../agw-lib/outcome" }
+agw-service = { path = "../../agw-service" }
 
-catalyser = { workspace = true }
-log = { workspace = true }
-relm4 = { workspace = true }
-gtk4 = { workspace = true }
-libadwaita = { workspace = true }
+# I/O
 tokio = { workspace = true }
 futures = { workspace = true }
-serde = { workspace = true }
+
+# GTK/UI
+gtk4 = { workspace = true }
+relm4 = { workspace = true }
+relm4-components = { workspace = true }
+libadwaita = { workspace = true }
+
+# Utilities
+catalyser = { workspace = true }
+log = { workspace = true }
