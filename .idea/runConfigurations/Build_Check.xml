@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build+Check" type="CompoundRunConfigurationType">
+    <toRun name="Build" targetId="RsBuildProfile:dev" type="CargoCommandRunConfiguration" />
+    <toRun name="Clippy" type="CargoCommandRunConfiguration" />
+    <toRun name="Fmt" type="CargoCommandRunConfiguration" />
+    <toRun name="Std" targetId="RsBuildProfile:dev" type="CargoCommandRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
