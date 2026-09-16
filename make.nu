@@ -36,10 +36,15 @@ def "main install" [] {
   main init
   main check
 
-  log info "install..."
+  log info "build..."
   cargo build --workspace --all-targets --all-features --release
-  cp $"($build_dir)/($bin_name)" $bin_home
-
+  let target = $"($bin_home)/($bin_name)"
+  if ($target | path exists) {
+    log warning "remove old binary before..."
+    rm -f $target
+  }
+  log info "install..."
+  cp -iu $"($build_dir)/($bin_name)" $bin_home
 }
 
 # Build `agwaita` into `build/` directory
