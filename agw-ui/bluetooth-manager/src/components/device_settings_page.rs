@@ -32,6 +32,11 @@ pub enum DeviceSettingsPageInput {
     SyncFromStore,
 }
 
+#[derive(Debug)]
+pub enum DeviceSettingsPageOutput {
+    TitleChanged(String),
+}
+
 pub struct DeviceSettingsPageConfig {
     pub service_adapter: Arc<BluetoothServiceAdapter>,
 }
@@ -44,7 +49,7 @@ pub struct DeviceSettingsPage {
 #[relm4::component(pub)]
 impl SimpleComponent for DeviceSettingsPage {
     type Input = DeviceSettingsPageInput;
-    type Output = ();
+    type Output = DeviceSettingsPageOutput;
     type Init = DeviceSettingsPageConfig;
 
     view! {
@@ -69,10 +74,6 @@ impl SimpleComponent for DeviceSettingsPage {
                             #[watch]
                             set_icon_name: Some(model.current_device.as_ref().and_then(|d| d.icon.as_deref()).unwrap_or("bluetooth-symbolic")),
                             set_pixel_size: 80,
-                        },
-                        gtk::Label {
-                            #[watch]
-                            set_label: model.current_device.as_ref().map(|d| d.alias.as_str()).unwrap_or("Device Settings"),
                         },
                     },
 
@@ -203,11 +204,21 @@ impl SimpleComponent for DeviceSettingsPage {
         match msg {
             DeviceSettingsPageInput::ShowDevice(address) => {
                 self.current_device = self.service_adapter.store().get_device(&address);
+                if let Some(device) = self.current_device.as_ref() {
+                    sender
+                        .output(DeviceSettingsPageOutput::TitleChanged(device.alias.clone()))
+                        .ok();
+                }
             },
             DeviceSettingsPageInput::StoreEvent(event) => match *event {
                 BluetoothEvent::DeviceAdded(device) | BluetoothEvent::DeviceChanged(device) => {
                     if self.current_device.as_ref().map(|d| d.address.as_str()) == Some(device.address.as_str()) {
                         self.current_device = Some(device);
+                        if let Some(device) = self.current_device.as_ref() {
+                            sender
+                                .output(DeviceSettingsPageOutput::TitleChanged(device.alias.clone()))
+                                .ok();
+                        }
                     }
                 },
                 BluetoothEvent::DeviceRemoved(address) if self.current_device.as_ref().map(|d| d.address.as_str()) == Some(address.as_str()) => {

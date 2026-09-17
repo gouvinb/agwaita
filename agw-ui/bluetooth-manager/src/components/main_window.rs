@@ -10,11 +10,13 @@ use crate::{
         blocked_devices_page::{
             BlockedDevicesPage,
             BlockedDevicesPageConfig,
+            BlockedDevicesPageOutput,
         },
         device_settings_page::{
             DeviceSettingsPage,
             DeviceSettingsPageConfig,
             DeviceSettingsPageInput,
+            DeviceSettingsPageOutput,
         },
         pairing_dialog::{
             PairingDialog,
@@ -57,6 +59,10 @@ pub enum BluetoothManagerWindowInput {
     ShowDeviceSettings(String),
     PairingRequested(PairingRequest),
     PairingCleared,
+    AdapterTitleChanged(String),
+    BlockedTitleChanged(String),
+    DeviceTitleChanged(String),
+    SyncContentTitle,
 }
 
 pub struct BluetoothManagerWindowConfig {
@@ -66,6 +72,10 @@ pub struct BluetoothManagerWindowConfig {
 pub struct BluetoothManagerWindow {
     root_stack: gtk::Stack,
     main_stack: gtk::Stack,
+    content_title: adw::WindowTitle,
+    adapter_title: String,
+    blocked_title: String,
+    device_title: String,
     _sidebar: Controller<Sidebar>,
     _adapter_settings_page: Controller<AdapterSettingsPage>,
     _blocked_devices_page: Controller<BlockedDevicesPage>,
@@ -121,6 +131,10 @@ impl SimpleComponent for BluetoothManagerWindow {
                                     set_active: true,
                                     set_tooltip_text: Some("Hide Sidebar"),
                                 },
+
+                                #[wrap(Some)]
+                                #[name = "content_title"]
+                                set_title_widget = &adw::WindowTitle {},
                             },
 
                             #[wrap(Some)]
@@ -162,19 +176,24 @@ impl SimpleComponent for BluetoothManagerWindow {
             })
             .forward(sender.input_sender(), |output| match output {
                 AdapterSettingsPageOutput::ShowBlockedDevices => BluetoothManagerWindowInput::ShowBlockedDevices,
+                AdapterSettingsPageOutput::TitleChanged(title) => BluetoothManagerWindowInput::AdapterTitleChanged(title),
             });
 
         let blocked_devices_page = BlockedDevicesPage::builder()
             .launch(BlockedDevicesPageConfig {
                 service_adapter: Arc::clone(&config.service_adapter),
             })
-            .detach();
+            .forward(sender.input_sender(), |output| match output {
+                BlockedDevicesPageOutput::TitleChanged(title) => BluetoothManagerWindowInput::BlockedTitleChanged(title),
+            });
 
         let device_settings_page = DeviceSettingsPage::builder()
             .launch(DeviceSettingsPageConfig {
                 service_adapter: Arc::clone(&config.service_adapter),
             })
-            .detach();
+            .forward(sender.input_sender(), |output| match output {
+                DeviceSettingsPageOutput::TitleChanged(title) => BluetoothManagerWindowInput::DeviceTitleChanged(title),
+            });
 
         let pairing_dialog = PairingDialog::builder()
             .launch(PairingDialogConfig {
@@ -255,9 +274,24 @@ impl SimpleComponent for BluetoothManagerWindow {
             .main_stack
             .set_visible_child_name("adapter_settings_page");
 
+        let sync_sender = sender.input_sender().clone();
+        widgets
+            .main_stack
+            .connect_notify_local(Some("visible-child-name"), move |_, _| {
+                sync_sender
+                    .send(BluetoothManagerWindowInput::SyncContentTitle)
+                    .ok();
+            });
+
+        widgets.content_title.set_title("Adapter Settings");
+
         let model = Self {
             root_stack: widgets.root_stack.clone(),
             main_stack: widgets.main_stack.clone(),
+            content_title: widgets.content_title.clone(),
+            adapter_title: "Adapter Settings".to_string(),
+            blocked_title: "Blocked Devices".to_string(),
+            device_title: String::new(),
             _sidebar: sidebar,
             _adapter_settings_page: adapter_settings_page,
             _blocked_devices_page: blocked_devices_page,
@@ -297,6 +331,37 @@ impl SimpleComponent for BluetoothManagerWindow {
             BluetoothManagerWindowInput::PairingCleared => {
                 self.pairing_dialog.emit(PairingDialogInput::Close);
             },
+            BluetoothManagerWindowInput::AdapterTitleChanged(title) => {
+                self.adapter_title = title;
+                self.sync_content_title();
+            },
+            BluetoothManagerWindowInput::BlockedTitleChanged(title) => {
+                self.blocked_title = title;
+                self.sync_content_title();
+            },
+            BluetoothManagerWindowInput::DeviceTitleChanged(title) => {
+                self.device_title = title;
+                self.sync_content_title();
+            },
+            BluetoothManagerWindowInput::SyncContentTitle => {
+                self.sync_content_title();
+            },
+        }
+    }
+}
+
+impl BluetoothManagerWindow {
+    /// Met à jour le titre du header de contenu à partir du titre stocké
+    /// correspondant à la page actuellement visible dans `main_stack`.
+    fn sync_content_title(&self) {
+        let title = match self.main_stack.visible_child_name().as_deref() {
+            Some("adapter_settings_page") => Some(self.adapter_title.as_str()),
+            Some("blocked_devices_page") => Some(self.blocked_title.as_str()),
+            Some("device_settings_page") => Some(self.device_title.as_str()),
+            _ => None,
+        };
+        if let Some(title) = title {
+            self.content_title.set_title(title);
         }
     }
 }

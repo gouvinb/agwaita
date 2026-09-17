@@ -39,6 +39,11 @@ pub enum BlockedDevicesPageInput {
     SyncFromStore,
 }
 
+#[derive(Debug)]
+pub enum BlockedDevicesPageOutput {
+    TitleChanged(String),
+}
+
 pub struct BlockedDeviceRow {
     pub device: Device,
 }
@@ -102,7 +107,7 @@ impl FactoryComponent for BlockedDeviceRow {
 #[relm4::component(pub)]
 impl SimpleComponent for BlockedDevicesPage {
     type Input = BlockedDevicesPageInput;
-    type Output = ();
+    type Output = BlockedDevicesPageOutput;
     type Init = BlockedDevicesPageConfig;
 
     view! {
@@ -119,8 +124,6 @@ impl SimpleComponent for BlockedDevicesPage {
                     set_spacing: 20,
 
                     adw::PreferencesGroup {
-                        set_title: "Blocked Devices",
-
                         #[local_ref]
                         devices_list_box -> gtk::ListBox {
                             set_selection_mode: gtk::SelectionMode::None,
@@ -173,6 +176,12 @@ impl SimpleComponent for BlockedDevicesPage {
             service_adapter: config.service_adapter,
             devices,
         };
+
+        sender
+            .output(BlockedDevicesPageOutput::TitleChanged(
+                "Blocked Devices".to_string(),
+            ))
+            .ok();
 
         ComponentParts { model, widgets }
     }

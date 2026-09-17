@@ -33,6 +33,7 @@ pub enum AdapterSettingsPageInput {
 #[derive(Debug)]
 pub enum AdapterSettingsPageOutput {
     ShowBlockedDevices,
+    TitleChanged(String),
 }
 
 pub struct AdapterSettingsPageConfig {
@@ -154,6 +155,12 @@ impl SimpleComponent for AdapterSettingsPage {
         };
 
         let widgets = view_output!();
+
+        sender
+            .output(AdapterSettingsPageOutput::TitleChanged(
+                "Adapter Settings".to_string(),
+            ))
+            .ok();
 
         ComponentParts { model, widgets }
     }
