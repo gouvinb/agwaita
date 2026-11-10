@@ -22,6 +22,9 @@ catalyser = { workspace = true }
 log = { workspace = true }
 clap = { workspace = true }
 
+[build-dependencies]
+sha2 = { workspace = true }
+
 [[bin]]
 name = "agwaita"
 path = "src/main.rs"

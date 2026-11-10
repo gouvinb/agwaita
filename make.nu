@@ -12,11 +12,6 @@ let build_dir = "./target/release"
 
 let bin_name = "agwaita"
 
-def "sha1sum_all" [path: path]: [nothing -> string] {
-  let hash = (fd . $path -x sha1sum | lines | sort | into string)
-  return $hash
-}
-
 def commands [] {
   [ "install" "build" "hotrun" "run" "check" "clean" "init" ]
 }
@@ -28,6 +23,33 @@ def commands_check [] {
 def agwaita_log_level [] {
   ["CRITICAL" "ERROR" "WARNING" "INFO" "DEBUG"]
 }
+
+def prepare-hook [
+  hook_name: string
+  target_scripts: record<POSIX: string, NUSHELL: string>
+  script_shell: string
+] {
+  let hook_path = $".git/hooks/($hook_name)"
+
+  for target_script in ($target_scripts | values) {
+    if not ($target_script | path exists) {
+      error make { msg: $"script not found: ($target_script)" }
+    }
+  }
+
+  if ($hook_path | path exists) {
+    let backup_file_name = $"($hook_path).(date now | format date %s).bak"
+    log info $"hook found, make backup: ($backup_file_name)"
+    mv $hook_path $backup_file_name
+  }
+
+  let hook_content = $"#!/usr/bin/env sh\nexec ($target_scripts | get $script_shell)\n"
+
+  log info $"creating hook: ($hook_path)..."
+  $hook_content | save $hook_path
+  chmod +x $hook_path
+}
+
 
 # Script
 
@@ -54,7 +76,7 @@ def "main build" [] {
 }
 
 # Run `agwaita` directly
-def "main hotrun" [
+def --wrapped "main hotrun" [
   --log-level(-l): string@agwaita_log_level = "DEBUG"
   ...args: string
 ] {
@@ -119,35 +141,13 @@ def "main clean" [] {
 
 # Initialize workspace
 def "main init" [
-  --pre-commit-posix-only # install pre-commit hooks only for POSIX systems
+  --hooks-posix-only # install hooks only for POSIX systems
 ] {
   log info "init workspace..."
   cargo fetch
 
-  let hook_path = ".git/hooks/pre-commit"
-
-  let target_script = if $pre_commit_posix_only {
-    "./scripts/pre-commit.sh"
-  } else {
-    "./scripts/pre-commit.nu"
-  }
-
-  if not ($target_script | path exists) {
-    error make { msg: $"script not found: ($target_script)" }
-  }
-
-  if ($hook_path | path exists) {
-    let backup_file_name = $"($hook_path).(date now | format date %s).bak"
-    log info $"hook found, make backup: ($backup_file_name)"
-    mv $hook_path $backup_file_name
-  }
-
-  let hook_content = $"#!/usr/bin/env sh\nexec ($target_script)\n"
-
-
-  log info $"creating hook: ($hook_path)..."
-  $hook_content | save $hook_path
-  chmod +x $hook_path
+  prepare-hook "pre-commit" {POSIX: "./scripts/pre-commit.sh" NUSHELL: "./scripts/pre-commit.nu"} (if $hooks_posix_only {"POSIX"} else {"NUSHELL"})
+  prepare-hook "pre-push" {POSIX: "./scripts/pre-push.sh" NUSHELL: "./scripts/pre-push.nu"} (if $hooks_posix_only {"POSIX"} else {"NUSHELL"})
 }
 
 # Make script for agwaita
