@@ -6,6 +6,10 @@
 
 mod action;
 
+#[cfg(test)]
+#[path = "../build/version.rs"]
+mod version;
+
 use crate::action::CliAction;
 use agw_lib_outcome::error::AgwError;
 use clap::Parser;
@@ -22,7 +26,7 @@ pub trait CommandRun {
 
 #[derive(clap::Parser)]
 #[command(name = "agwaita")]
-#[command(version, about = "Agwaita Shell - A Wayland compositor shell", long_about = None)]
+#[command(version = env!("AGW_VERSION"), about = "Agwaita Shell - A Wayland compositor shell", long_about = None)]
 #[command(arg_required_else_help = true)]
 struct Cli {
     #[command(subcommand)]
